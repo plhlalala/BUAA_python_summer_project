@@ -1,0 +1,30 @@
+{% extends "basehome.html" %}
+{% block title %}添加选项{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">为 {{ question.title }} 添加选项</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="option_text" class="block text-gray-700 font-bold mb-2">选项内容</label>
+                {{ form.option_text }}
+            </div>
+            <div class="mb-4">
+                <label for="is_correct" class="block text-gray-700 font-bold mb-2">是否正确</label>
+                {{ form.is_correct }}
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" name="add_another" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
+                    添加另一个选项
+                </button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    保存并完成
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

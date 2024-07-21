@@ -1,0 +1,52 @@
+{% extends "basehome.html" %}
+{% block title %}创建题单{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">创建题单</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <form method="post" id="questionSetForm">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700 font-bold mb-2">题单名称</label>
+                <input type="text" id="name" name="name" class="form-input mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 font-bold mb-2">题单描述</label>
+                <textarea id="description" name="description" class="form-textarea mt-1 block w-full"></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" onclick="submitQuestionSet()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    创建
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function submitQuestionSet() {
+        const formData = new FormData(document.getElementById('questionSetForm'));
+        fetch("{% url 'create_question_set' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.href = "{% url 'question_management' %}";
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+{% endblock %}

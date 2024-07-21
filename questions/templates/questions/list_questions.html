@@ -1,0 +1,20 @@
+{% extends "basehome.html" %}
+{% block title %}我的问题{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">我的问题</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <ul class="list-disc list-inside">
+            {% for question in questions %}
+                <li class="mb-2">
+                    <a href="{% url 'question_detail' question.id %}" class="text-blue-500 hover:text-blue-700">
+                        {{ question.title }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

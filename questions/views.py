@@ -1,122 +1,87 @@
-# from django.shortcuts import render, redirect, get_object_or_404
-# from django.contrib.auth.decorators import login_required
-# from .models import QuestionGroup, Question, Choice, UserAnswer
-# from .forms import QuestionGroupForm, QuestionForm, ChoiceFormSet, UploadFileForm
-# from django.contrib import messages
-# import pytesseract
-# from PIL import Image
-# import io
-#
-#
-# @login_required
-# def create_question(request, group_pk):
-#     question_group = get_object_or_404(QuestionGroup, pk=group_pk)
-#     if request.method == 'POST':
-#         form = QuestionForm(request.POST)
-#         formset = ChoiceFormSet(request.POST)
-#         if form.is_valid() and formset.is_valid():
-#             question = form.save(commit=False)
-#             question.group = question_group
-#             question.created_by = request.user
-#             question.save()
-#             formset.instance = question
-#             formset.save()
-#             return redirect('question_group_detail', pk=group_pk)
-#     else:
-#         form = QuestionForm()
-#         formset = ChoiceFormSet()
-#     return render(request, 'questions/create_question.html', {
-#         'form': form,
-#         'formset': formset,
-#         'question_group': question_group
-#     })
-#
-#
-# @login_required
-# def create_question_group(request):
-#     if request.method == 'POST':
-#         form = QuestionGroupForm(request.POST)
-#         if form.is_valid():
-#             question_group = form.save(commit=False)
-#             question_group.creator = request.user
-#             question_group.save()
-#             return redirect('question_group_detail', pk=question_group.pk)
-#     else:
-#         form = QuestionGroupForm()
-#     return render(request, 'questions/create_question_group.html', {'form': form})
-#
-#
-# @login_required
-# def question_group_detail(request, pk):
-#     question_group = get_object_or_404(QuestionGroup, pk=pk)
-#     questions = question_group.questions.all()
-#     return render(request, 'questions/question_group_detail.html', {
-#         'question_group': question_group,
-#         'questions': questions
-#     })
-#
-#
-# @login_required
-# def upload_file(request):
-#     if request.method == 'POST':
-#         form = UploadFileForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             file = request.FILES['file']
-#             if file.name.lower().endswith(('.png', '.jpg', '.jpeg')):
-#                 image = Image.open(io.BytesIO(file.read()))
-#                 text = pytesseract.image_to_string(image)
-#             elif file.name.lower().endswith('.pdf'):
-#                 # 在此添加PDF处理逻辑
-#                 text = "PDF处理尚未实现"
-#             else:
-#                 messages.error(request, "不支持的文件格式")
-#                 return redirect('upload_file')
-#
-#             return render(request, 'questions/edit_extracted_text.html', {'text': text})
-#     else:
-#         form = UploadFileForm()
-#     return render(request, 'questions/upload_file.html', {'form': form})
-#
-#
-# @login_required
-# def take_quiz(request, group_pk):
-#     question_group = get_object_or_404(QuestionGroup, pk=group_pk)
-#     questions = question_group.questions.all()
-#
-#     if request.method == 'POST':
-#         for question in questions:
-#             answer = request.POST.get(f'question_{question.id}')
-#             is_correct = False
-#             if question.type == 'MC':
-#                 correct_choice = question.choices.filter(is_correct=True).first()
-#                 is_correct = (answer == str(correct_choice.id))
-#             elif question.type == 'FIB':
-#                 correct_answer = question.choices.filter(is_correct=True).first().content
-#                 is_correct = (answer.lower() == correct_answer.lower())
-#
-#             UserAnswer.objects.create(
-#                 user=request.user,
-#                 question=question,
-#                 answer=answer,
-#                 is_correct=is_correct
-#             )
-#         return redirect('quiz_results', group_pk=group_pk)
-#
-#     return render(request, 'questions/take_quiz.html', {
-#         'question_group': question_group,
-#         'questions': questions
-#     })
-#
-#
-# @login_required
-# def quiz_results(request, group_pk):
-#     question_group = get_object_or_404(QuestionGroup, pk=group_pk)
-#     user_answers = UserAnswer.objects.filter(
-#         user=request.user,
-#         question__group=question_group
-#     ).order_by('question')
-#
-#     return render(request, 'questions/quiz_results.html', {
-#         'question_group': question_group,
-#         'user_answers': user_answers
-#     })
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Question, MultipleChoiceOption, QuestionSet
+from .forms import QuestionForm, MultipleChoiceOptionForm
+
+@login_required
+def question_management(request):
+    search_query = request.GET.get('search', '')
+    if search_query:
+        search_results = Question.objects.filter(title__icontains=search_query)
+        search_performed = True
+    else:
+        search_results = []
+        search_performed = False
+
+    user_questions = Question.objects.filter(creator=request.user)
+    user_question_sets = QuestionSet.objects.filter(creator=request.user)
+
+    return render(request, 'questions/management_question.html', {
+        'user_questions': user_questions,
+        'user_question_sets': user_question_sets,
+        'search_results': search_results,
+        'search_performed': search_performed
+    })
+
+@login_required
+def create_question(request):
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, request.FILES)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.creator = request.user
+            question.save()
+            form.save_m2m()
+            return JsonResponse({'success': True, 'message': '问题已创建', 'question_id': question.id})
+        return JsonResponse({'success': False, 'message': '创建问题失败'})
+    else:
+        form = QuestionForm()
+    return render(request, 'questions/create_question.html', {'form': form})
+
+@login_required
+def add_option(request):
+    if request.method == 'POST':
+        question_id = request.POST.get('question_id')
+        question = get_object_or_404(Question, id=question_id)
+        option_text = request.POST.get('option_text')
+        is_correct = request.POST.get('is_correct') == 'on'
+
+        option = MultipleChoiceOption.objects.create(
+            question=question,
+            option_text=option_text,
+            is_correct=is_correct
+        )
+        return JsonResponse({'success': True, 'message': '选项已添加', 'option_text': option.option_text, 'is_correct': is_correct})
+    return JsonResponse({'success': False, 'message': '添加选项失败'})
+
+@login_required
+def share_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    if request.method == 'POST':
+        question.shared_with.add(request.user)
+        return JsonResponse({'success': True, 'message': '问题已成功分享'})
+    return JsonResponse({'success': False, 'message': '分享失败'})
+
+@login_required
+def question_detail(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    return render(request, 'questions/detail_question.html', {'question': question})
+
+@login_required
+def create_question_set(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        question_set = QuestionSet.objects.create(
+            name=name,
+            description=description,
+            creator=request.user
+        )
+        return JsonResponse({'success': True, 'message': '题单已创建', 'question_set_id': question_set.id})
+    return render(request, 'questions/create_question_set.html')
+
+@login_required
+def question_set_detail(request, question_set_id):
+    question_set = get_object_or_404(QuestionSet, id=question_set_id)
+    return render(request, 'questions/detail_question_set.html', {'question_set': question_set})

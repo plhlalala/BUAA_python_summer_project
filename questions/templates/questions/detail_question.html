@@ -1,0 +1,25 @@
+{% extends "basehome.html" %}
+{% block title %}问题详情{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">{{ question.title }}</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <p class="mb-4">{{ question.description }}</p>
+
+        {% if question.format == 'image' %}
+            <img src="{{ question.image.url }}" alt="Question Image" class="mb-4">
+        {% endif %}
+
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">选项:</h2>
+        <ul class="list-disc list-inside">
+            {% for option in question.options.all %}
+                <li class="mb-2">
+                    {{ option.option_text }} {% if option.is_correct %}<span class="text-green-500">(正确)</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

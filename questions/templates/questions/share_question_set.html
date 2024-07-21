@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Share Question Set</h2>
+  <form method="post">
+    {% csrf_token %}
+    <!-- Sharing logic will go here -->
+    <button type="submit">Share</button>
+  </form>
+{% endblock %}
