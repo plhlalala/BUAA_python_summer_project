@@ -1,0 +1,45 @@
+{% extends "basehome.html" %}
+{% block title %}组列表{% endblock %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">组列表</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <form method="get" action="{% url 'group_list' %}" class="mb-4">
+            <div class="flex">
+                <input type="text" name="search" placeholder="搜索组..." class="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r-lg">搜索</button>
+            </div>
+        </form>
+
+        {% if groups %}
+            <ul class="divide-y divide-gray-200">
+            {% for group in groups %}
+                <li class="py-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">{{ group.name }}</h3>
+                        <p class="text-sm text-gray-600">成员数: {{ group.member_count }}</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'group_detail' group.id %}" class="text-blue-500 hover:text-blue-700 mr-4">查看详情</a>
+                        {% if user not in group.members.all %}
+                            <a href="{% url 'join_group' group.id %}" class="text-green-500 hover:text-green-700">申请加入</a>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600 text-center">没有找到匹配的组。</p>
+        {% endif %}
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'create_group' %}" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            创建新的学习小组
+        </a>
+    </div>
+</div>
+
+{% endblock %}

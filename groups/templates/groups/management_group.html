@@ -1,0 +1,93 @@
+{% extends "basehome.html" %}
+{% block title %}组管理{% endblock %}
+{% block content %}
+
+    <div class="max-w-6xl mx-auto mt-10 px-4">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">组管理</h1>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">我的组</h2>
+                <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                    {% if user_groups %}
+                        {% for group in user_groups %}
+                            <div class="mb-2">
+                                {{ group.name }}
+                                <a href="{% url 'group_detail' group.id %}" class="text-blue-500 hover:text-blue-700">查看详情</a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>您还没有加入任何组。</p>
+                    {% endif %}
+                </div>
+
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">创建新组</h2>
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <a href="{% url 'create_group' %}"
+                       class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-center">
+                        创建新的学习小组
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">搜索和加入组</h2>
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <form method="GET" action="{% url 'group_management' %}" class="mb-4">
+                        <div class="flex">
+                            <input type="text" name="search" placeholder="搜索组名"
+                                   class="flex-grow border rounded-l px-4 py-2">
+                            <button type="submit"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">搜索
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="searchResults">
+                        {% if search_results %}
+                            {% for group in search_results %}
+                                <div class="mb-2">
+                                    {{ group.name }}
+                                    {% if request.user in group.members.all %}
+                                        <span class="text-green-500">已加入</span>
+                                    {% else %}
+                                        <button onclick="joinGroup({{ group.id }})"
+                                                class="text-green-500 hover:text-green-700">申请加入
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% elif search_performed %}
+                            <p>没有找到匹配的组。</p>
+                        {% else %}
+                            <p>使用上面的搜索框查找组。</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function joinGroup(groupId) {
+            fetch(`/groups/join_group/${groupId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload(); // 刷新页面以更新组列表
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+{% endblock %}
