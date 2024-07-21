@@ -9,4 +9,7 @@ urlpatterns = [
     path('detail/<int:question_id>/', views.question_detail, name='question_detail'),
     path('create_set/', views.create_question_set, name='create_question_set'),
     path('set_detail/<int:question_set_id>/', views.question_set_detail, name='question_set_detail'),
+    path('add_question_to_set/<int:question_set_id>/', views.add_question_to_set, name='add_question_to_set'),
+    path('remove_question_from_set/<int:question_set_id>/<int:question_id>/', views.remove_question_from_set,
+         name='remove_question_from_set'),
 ]

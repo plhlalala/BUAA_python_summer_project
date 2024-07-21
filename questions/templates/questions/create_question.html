@@ -24,17 +24,13 @@
                 <label for="question_type" class="block text-gray-700 font-bold mb-2">问题类型</label>
                 {{ form.question_type }}
             </div>
-            <div class="mb-4">
-                <label for="image" class="block text-gray-700 font-bold mb-2">上传图片 (可选)</label>
+            <div class="mb-4" id="imageUpload" style="display: none;">
+                <label for="image" class="block text-gray-700 font-bold mb-2">上传图片</label>
                 {{ form.image }}
             </div>
-            <div class="mb-4">
+            <div class="mb-4" id="textInput">
                 <label for="correct_answer" class="block text-gray-700 font-bold mb-2">正确答案 (选择题必填)</label>
                 {{ form.correct_answer }}
-            </div>
-            <div class="mb-4">
-                <label for="chapters" class="block text-gray-700 font-bold mb-2">章节</label>
-                {{ form.chapters }}
             </div>
             <div class="flex justify-end">
                 <button type="button" onclick="submitQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
@@ -72,6 +68,16 @@
 </div>
 
 <script>
+    document.getElementById('id_format').addEventListener('change', function() {
+        if (this.value === 'image') {
+            document.getElementById('imageUpload').style.display = 'block';
+            document.getElementById('textInput').style.display = 'none';
+        } else {
+            document.getElementById('imageUpload').style.display = 'none';
+            document.getElementById('textInput').style.display = 'block';
+        }
+    });
+
     function submitQuestion() {
         const formData = new FormData(document.getElementById('questionForm'));
         fetch("{% url 'create_question' %}", {

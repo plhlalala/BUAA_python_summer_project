@@ -1,12 +1,15 @@
 from django import forms
-from .models import Question, MultipleChoiceOption, Chapter
+from .models import Question, QuestionSet
 
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['title', 'description', 'format', 'question_type', 'image', 'correct_answer', 'chapters']
+        fields = ['title', 'description', 'format', 'question_type', 'image', 'correct_answer']
 
-class MultipleChoiceOptionForm(forms.ModelForm):
+class QuestionSetForm(forms.ModelForm):
     class Meta:
-        model = MultipleChoiceOption
-        fields = ['option_text', 'is_correct']
+        model = QuestionSet
+        fields = ['name', 'description']
+
+class QuestionSearchForm(forms.Form):
+    query = forms.CharField(max_length=255, required=False, label='Search Questions')

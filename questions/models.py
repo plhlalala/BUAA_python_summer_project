@@ -2,14 +2,6 @@ from django.db import models
 from django.conf import settings
 
 
-class Chapter(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.name
-
-
 class Question(models.Model):
     TEXT = 'text'
     IMAGE = 'image'
@@ -31,7 +23,6 @@ class Question(models.Model):
     question_type = models.CharField(max_length=4, choices=QUESTION_TYPE_CHOICES)
     image = models.ImageField(upload_to='questions/', blank=True, null=True)
     correct_answer = models.TextField(blank=True)
-    chapters = models.ManyToManyField(Chapter)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_questions', blank=True)
 
@@ -51,7 +42,7 @@ class MultipleChoiceOption(models.Model):
 class QuestionSet(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    questions = models.ManyToManyField(Question, related_name='question_sets')
+    questions = models.ManyToManyField(Question, related_name='question_sets', blank=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_question_sets', blank=True)
 
