@@ -44,6 +44,7 @@ def create_question(request):
         form = QuestionForm()
     return render(request, 'questions/create_question.html', {'form': form})
 
+
 @login_required
 def ocr_image(request):
     if request.method == 'POST' and request.FILES.get('ocr_image'):
@@ -59,6 +60,18 @@ def ocr_image(request):
         text = pytesseract.image_to_string(img, lang='chi_sim', config=custom_config)
         return JsonResponse({'success': True, 'text': text})
     return JsonResponse({'success': False, 'message': 'OCR识别失败'})
+
+
+@login_required
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    if request.method == 'POST':
+        if question.creator == request.user:
+            question.delete()
+            return JsonResponse({'success': True, 'message': '问题已删除'})
+        else:
+            return JsonResponse({'success': False, 'message': '你没有权限删除此问题'})
+    return JsonResponse({'success': False, 'message': '请求无效'})
 
 
 @login_required

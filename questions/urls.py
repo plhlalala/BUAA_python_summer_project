@@ -12,4 +12,5 @@ urlpatterns = [
     path('add_question_to_set/<int:question_set_id>/', views.add_question_to_set, name='add_question_to_set'),
     path('remove_question_from_set/<int:question_set_id>/<int:question_id>/', views.remove_question_from_set,
          name='remove_question_from_set'),
+    path('delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
 ]
