@@ -9,78 +9,73 @@
         <form method="post" enctype="multipart/form-data" id="questionForm">
             {% csrf_token %}
             <div class="mb-4">
-                <label for="title" class="block text-gray-700 font-bold mb-2">问题标题</label>
-                {{ form.title }}
+                <label for="title" class="block text-gray-700 font-bold mb-2">题目标题</label>
+                <input type="text" id="title" name="title" class="form-input mt-1 block w-full border rounded" required>
             </div>
             <div class="mb-4">
-                <label for="description" class="block text-gray-700 font-bold mb-2">问题描述</label>
-                {{ form.description }}
+                <label for="format" class="block text-gray-700 font-bold mb-2">题目格式</label>
+                <select id="format" name="format" class="form-select mt-1 block w-full border rounded" onchange="toggleOCROptions()">
+                    <option value="text">文字</option>
+                    <option value="image">图片</option>
+                </select>
             </div>
-            <div class="mb-4">
-                <label for="format" class="block text-gray-700 font-bold mb-2">问题格式</label>
-                {{ form.format }}
+            <div id="textOptions">
+                <div class="mb-4">
+                    <label for="description" class="block text-gray-700 font-bold mb-2">题目描述</label>
+                    <textarea id="description" name="description" class="form-textarea mt-1 block w-full border rounded" rows="4"></textarea>
+                    <input type="file" id="ocr_description" class="mt-2" accept="image/*">
+                    <button type="button" onclick="performOCR('description')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-2">OCR 识别</button>
+                </div>
+                <div class="mb-4">
+                    <label for="correct_answer" class="block text-gray-700 font-bold mb-2">参考答案</label>
+                    <textarea id="correct_answer" name="correct_answer" class="form-textarea mt-1 block w-full border rounded" rows="4"></textarea>
+                    <input type="file" id="ocr_correct_answer" class="mt-2" accept="image/*">
+                    <button type="button" onclick="performOCR('correct_answer')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-2">OCR 识别</button>
+                </div>
+                <div class="mb-4">
+                    <label for="aux_image" class="block text-gray-700 font-bold mb-2">辅助图片</label>
+                    <input type="file" id="aux_image" name="aux_image" class="form-input mt-1 block w-full border rounded" accept="image/*">
+                </div>
             </div>
-            <div class="mb-4">
-                <label for="question_type" class="block text-gray-700 font-bold mb-2">问题类型</label>
-                {{ form.question_type }}
+            <div id="imageOptions" style="display: none;">
+                <div class="mb-4">
+                    <label for="image_description" class="block text-gray-700 font-bold mb-2">题目描述</label>
+                    <input type="file" id="image_description" name="image_description" class="form-input mt-1 block w-full border rounded" accept="image/*">
+                </div>
+                <div class="mb-4">
+                    <label for="image_answer" class="block text-gray-700 font-bold mb-2">参考答案</label>
+                    <input type="file" id="image_answer" name="image_answer" class="form-input mt-1 block w-full border rounded" accept="image/*">
+                </div>
+                <div class="mb-4">
+                    <label for="image_aux" class="block text-gray-700 font-bold mb-2">辅助图片</label>
+                    <input type="file" id="image_aux" name="image_aux" class="form-input mt-1 block w-full border rounded" accept="image/*">
+                </div>
             </div>
-            <div class="mb-4" id="imageUpload" style="display: none;">
-                <label for="image" class="block text-gray-700 font-bold mb-2">上传图片</label>
-                {{ form.image }}
-            </div>
-            <div class="mb-4" id="textInput">
-                <label for="correct_answer" class="block text-gray-700 font-bold mb-2">正确答案 (选择题必填)</label>
-                {{ form.correct_answer }}
-            </div>
-            <div class="flex justify-end">
-                <button type="button" onclick="submitQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                    保存
-                </button>
-            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">创建问题</button>
         </form>
-
-        <div id="optionsContainer" class="hidden mt-6">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">添加选项</h2>
-            <form method="post" id="optionForm">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label for="option_text" class="block text-gray-700 font-bold mb-2">选项内容</label>
-                    <input type="text" id="option_text" name="option_text" class="form-input mt-1 block w-full">
-                </div>
-                <div class="mb-4">
-                    <label for="is_correct" class="block text-gray-700 font-bold mb-2">是否正确</label>
-                    <input type="checkbox" id="is_correct" name="is_correct" class="form-checkbox mt-1">
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" onclick="addOption()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
-                        添加选项
-                    </button>
-                    <button type="button" onclick="finalizeQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        完成
-                    </button>
-                </div>
-            </form>
-            <ul id="optionsList" class="mt-4">
-                <!-- 选项列表将显示在这里 -->
-            </ul>
-        </div>
     </div>
 </div>
 
 <script>
-    document.getElementById('id_format').addEventListener('change', function() {
-        if (this.value === 'image') {
-            document.getElementById('imageUpload').style.display = 'block';
-            document.getElementById('textInput').style.display = 'none';
+    function toggleOCROptions() {
+        const format = document.getElementById('format').value;
+        const textOptions = document.getElementById('textOptions');
+        const imageOptions = document.getElementById('imageOptions');
+        if (format === 'text') {
+            textOptions.style.display = 'block';
+            imageOptions.style.display = 'none';
         } else {
-            document.getElementById('imageUpload').style.display = 'none';
-            document.getElementById('textInput').style.display = 'block';
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'block';
         }
-    });
+    }
 
-    function submitQuestion() {
-        const formData = new FormData(document.getElementById('questionForm'));
-        fetch("{% url 'create_question' %}", {
+    function performOCR(fieldId) {
+        const fileInput = document.getElementById(`ocr_${fieldId}`);
+        const formData = new FormData();
+        formData.append('ocr_image', fileInput.files[0]);
+
+        fetch("{% url 'ocr_image' %}", {
             method: 'POST',
             body: formData,
             headers: {
@@ -91,9 +86,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('optionsContainer').classList.remove('hidden');
-                document.getElementById('questionForm').classList.add('hidden');
-                alert(data.message);
+                document.getElementById(fieldId).value = data.text;
             } else {
                 alert(data.message);
             }
@@ -101,35 +94,8 @@
         .catch(error => console.error('Error:', error));
     }
 
-    function addOption() {
-        const formData = new FormData(document.getElementById('optionForm'));
-        fetch("{% url 'add_option' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const optionList = document.getElementById('optionsList');
-                const newOption = document.createElement('li');
-                newOption.textContent = `${data.option_text} ${data.is_correct ? '(正确)' : ''}`;
-                optionList.appendChild(newOption);
-                document.getElementById('optionForm').reset();
-                alert(data.message);
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function finalizeQuestion() {
-        location.href = "{% url 'question_management' %}";
-    }
+    // 初始化时调用
+    toggleOCROptions();
 </script>
 
 {% endblock %}

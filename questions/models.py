@@ -10,17 +10,9 @@ class Question(models.Model):
         (IMAGE, 'Image')
     ]
 
-    MULTIPLE_CHOICE = 'mcq'
-    OPEN_ENDED = 'open'
-    QUESTION_TYPE_CHOICES = [
-        (MULTIPLE_CHOICE, 'Multiple Choice'),
-        (OPEN_ENDED, 'Open Ended')
-    ]
-
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     format = models.CharField(max_length=5, choices=FORMAT_CHOICES)
-    question_type = models.CharField(max_length=4, choices=QUESTION_TYPE_CHOICES)
     image = models.ImageField(upload_to='questions/', blank=True, null=True)
     correct_answer = models.TextField(blank=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -28,15 +20,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class MultipleChoiceOption(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
-    option_text = models.CharField(max_length=255)
-    is_correct = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.option_text
 
 
 class QuestionSet(models.Model):

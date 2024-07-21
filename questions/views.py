@@ -1,8 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+
+from shareplatform import settings
 from .models import Question, QuestionSet
 from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm
+import pytesseract
+from PIL import Image, ImageFilter, ImageEnhance
 
 
 @login_required
@@ -35,29 +39,26 @@ def create_question(request):
             question.creator = request.user
             question.save()
             form.save_m2m()
-            return JsonResponse({'success': True, 'message': '问题已创建', 'question_id': question.id})
-        return JsonResponse({'success': False, 'message': '创建问题失败'})
+            return redirect('question_detail', question_id=question.id)
     else:
         form = QuestionForm()
     return render(request, 'questions/create_question.html', {'form': form})
 
-
 @login_required
-def add_option(request):
-    if request.method == 'POST':
-        question_id = request.POST.get('question_id')
-        question = get_object_or_404(Question, id=question_id)
-        option_text = request.POST.get('option_text')
-        is_correct = request.POST.get('is_correct') == 'on'
-
-        option = MultipleChoiceOption.objects.create(
-            question=question,
-            option_text=option_text,
-            is_correct=is_correct
-        )
-        return JsonResponse(
-            {'success': True, 'message': '选项已添加', 'option_text': option.option_text, 'is_correct': is_correct})
-    return JsonResponse({'success': False, 'message': '添加选项失败'})
+def ocr_image(request):
+    if request.method == 'POST' and request.FILES.get('ocr_image'):
+        pytesseract.pytesseract.tesseract_cmd = r'D:\tesseract\tesseract.exe'
+        image = request.FILES['ocr_image']
+        img = Image.open(image)
+        # 图像预处理
+        img = img.convert('L')  # 转换为灰度图
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(2)  # 提高对比度
+        img = img.point(lambda x: 0 if x < 140 else 255)  # 二值化
+        custom_config = r'--oem 3 --psm 6'
+        text = pytesseract.image_to_string(img, lang='chi_sim', config=custom_config)
+        return JsonResponse({'success': True, 'text': text})
+    return JsonResponse({'success': False, 'message': 'OCR识别失败'})
 
 
 @login_required
@@ -88,13 +89,6 @@ def create_question_set(request):
     else:
         form = QuestionSetForm()
     return render(request, 'questions/create_question_set.html', {'form': form})
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Question, QuestionSet
-from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm
 
 
 @login_required
