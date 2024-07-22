@@ -38,7 +38,7 @@ def create_group(request):
             group.save()
             group.members.add(request.user)
             messages.success(request, 'Group created successfully.')
-            return redirect('group_detail', pk=group.pk)
+            return redirect('group_detail', group_id=group.id)
     else:
         form = GroupForm()
     return render(request, 'groups/create_group.html', {'form': form})
