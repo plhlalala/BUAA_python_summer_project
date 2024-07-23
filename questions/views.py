@@ -213,6 +213,8 @@ def check_answer(request, question_id):
 @login_required
 def question_set_list(request):
     user = request.user
+    search_query = request.GET.get('search', '')
+
     created_question_sets = QuestionSet.objects.filter(creator=user).distinct()
     group_ids = list(user.groups.values_list('id', flat=True))
     group_question_sets = QuestionSet.objects.filter(shared_with_groups__in=group_ids).prefetch_related(
@@ -221,6 +223,17 @@ def question_set_list(request):
     accessible_question_sets = created_question_sets | group_question_sets | public_question_sets
     accessible_question_sets = accessible_question_sets.distinct()
 
+    if search_query:
+        questions = Question.objects.filter(title__icontains=search_query,
+                                            question_sets__in=accessible_question_sets).distinct()
+        search_performed = True
+    else:
+        questions = []
+        search_performed = False
+
     return render(request, 'questions/question_set_list.html', {
-        'question_sets': accessible_question_sets
+        'question_sets': accessible_question_sets,
+        'questions': questions,
+        'search_performed': search_performed,
+        'search_query': search_query
     })
