@@ -12,9 +12,11 @@ class Question(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    description_image = models.ImageField(upload_to='questions/', blank=True, null=True)
     format = models.CharField(max_length=5, choices=FORMAT_CHOICES)
     image = models.ImageField(upload_to='questions/', blank=True, null=True)
     correct_answer = models.TextField(blank=True)
+    correct_answer_image = models.ImageField(upload_to='questions/', blank=True, null=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_questions', blank=True)
 

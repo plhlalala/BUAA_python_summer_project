@@ -12,6 +12,18 @@ class QuestionForm(forms.ModelForm):
         self.fields['image'].required = False
 
 
+class QuestionPictureForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['title', 'description_image', 'format', 'image', 'correct_answer_image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].required = False
+        self.fields['description_image'].required = False
+        self.fields['correct_answer_image'].required = False
+
+
 class QuestionSetForm(forms.ModelForm):
     class Meta:
         model = QuestionSet

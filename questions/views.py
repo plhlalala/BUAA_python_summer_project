@@ -1,10 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-
 from shareplatform import settings
 from .models import Question, QuestionSet
-from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm
+from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
 import pytesseract
 from PIL import Image, ImageFilter, ImageEnhance
 
@@ -33,7 +32,10 @@ def question_management(request):
 @login_required
 def create_question(request):
     if request.method == 'POST':
-        form = QuestionForm(request.POST, request.FILES)
+        if 'format' in request.POST and request.POST['format'] == 'image':
+            form = QuestionPictureForm(request.POST, request.FILES)
+        else:
+            form = QuestionForm(request.POST, request.FILES)
         if form.is_valid():
             question = form.save(commit=False)
             question.creator = request.user
@@ -51,7 +53,6 @@ def ocr_image(request):
         pytesseract.pytesseract.tesseract_cmd = r'D:\tesseract\tesseract.exe'
         image = request.FILES['ocr_image']
         img = Image.open(image)
-        # 图像预处理
         img = img.convert('L')  # 转换为灰度图
         enhancer = ImageEnhance.Contrast(img)
         img = enhancer.enhance(2)  # 提高对比度
