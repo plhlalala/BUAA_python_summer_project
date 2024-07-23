@@ -1,7 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+
+from groups.models import Group
 from shareplatform import settings
+from user.models import User
 from .models import Question, QuestionSet
 from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
 import pytesseract
@@ -76,6 +79,20 @@ def delete_question(request, question_id):
 
 
 @login_required
+def share_question_set(request, question_set_id):
+    question_set = get_object_or_404(QuestionSet, id=question_set_id)
+    if request.method == 'POST':
+        group_ids = request.POST.getlist('group_ids')
+        groups = Group.objects.filter(id__in=group_ids)
+        question_set.shared_with_groups.set(groups)
+        is_public = request.POST.get('is_public') == 'true'
+        question_set.is_public = is_public
+        question_set.save()
+        return JsonResponse({'success': True, 'message': '题组已共享'})
+    return JsonResponse({'success': False, 'message': '请求无效'})
+
+
+@login_required
 def share_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     if request.method == 'POST':
@@ -109,22 +126,20 @@ def create_question_set(request):
 def question_set_detail(request, question_set_id):
     question_set = get_object_or_404(QuestionSet, id=question_set_id)
 
-    if request.method == 'GET':
-        search_form = QuestionSearchForm(request.GET)
-        if search_form.is_valid():
-            query = search_form.cleaned_data['query']
-            search_results = Question.objects.filter(title__icontains=query)
-        else:
-            search_results = Question.objects.none()
-    else:
-        search_results = Question.objects.none()
-        search_form = QuestionSearchForm()
+    search_results = []
+    search_form = QuestionSearchForm(request.GET or None)
+    if search_form.is_valid():
+        query = search_form.cleaned_data['query']
+        search_results = Question.objects.filter(title__icontains=query).exclude(question_sets=question_set)
+
+    available_questions = Question.objects.filter(creator=request.user).exclude(question_sets=question_set)
 
     return render(request, 'questions/detail_question_set.html', {
         'question_set': question_set,
         'search_form': search_form,
         'search_results': search_results,
-        'available_questions': Question.objects.filter(creator=request.user).exclude(question_sets=question_set)
+        'available_questions': available_questions,
+        'all_groups': Group.objects.all(),
     })
 
 

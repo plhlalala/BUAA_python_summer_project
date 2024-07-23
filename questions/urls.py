@@ -13,4 +13,5 @@ urlpatterns = [
     path('remove_question_from_set/<int:question_set_id>/<int:question_id>/', views.remove_question_from_set,
          name='remove_question_from_set'),
     path('delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
+    path('share_question_set/<int:question_set_id>/', views.share_question_set, name='share_question_set'),
 ]

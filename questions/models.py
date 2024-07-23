@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 
+from groups.models import Group
+
 
 class Question(models.Model):
     TEXT = 'text'
@@ -29,7 +31,8 @@ class QuestionSet(models.Model):
     description = models.TextField(blank=True)
     questions = models.ManyToManyField(Question, related_name='question_sets', blank=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_question_sets', blank=True)
+    shared_with_groups = models.ManyToManyField(Group, related_name='shared_question_sets', blank=True)
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
