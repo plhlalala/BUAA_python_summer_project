@@ -2,52 +2,55 @@
 {% block title %}组管理{% endblock %}
 {% block content %}
 
-    <div class="max-w-6xl mx-auto mt-10 px-4">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">组管理</h1>
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">组管理</h1>
 
-        <div class="grid md:grid-cols-2 gap-8">
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">我的组</h2>
-                <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-                    {% if user_groups %}
+    <div class="grid md:grid-cols-2 gap-8">
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">我的组</h2>
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                {% if user_groups %}
+                    <ul>
                         {% for group in user_groups %}
-                            <div class="mb-2">
-                                {{ group.name }}
+                            <li class="flex justify-between items-center mb-2 border-b pb-2">
+                                <span>{{ group.name }}</span>
                                 <a href="{% url 'group_detail' group.id %}" class="text-blue-500 hover:text-blue-700">查看详情</a>
-                            </div>
+                            </li>
                         {% endfor %}
-                    {% else %}
-                        <p>您还没有加入任何组。</p>
-                    {% endif %}
-                </div>
-
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">创建新组</h2>
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <a href="{% url 'create_group' %}"
-                       class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-center">
-                        创建新的学习小组
-                    </a>
-                </div>
+                    </ul>
+                {% else %}
+                    <p>您还没有加入任何组。</p>
+                {% endif %}
             </div>
 
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">搜索和加入组</h2>
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <form method="GET" action="{% url 'group_management' %}" class="mb-4">
-                        <div class="flex">
-                            <input type="text" name="search" placeholder="搜索组名"
-                                   class="flex-grow border rounded-l px-4 py-2">
-                            <button type="submit"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">搜索
-                            </button>
-                        </div>
-                    </form>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">创建新组</h2>
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <a href="{% url 'create_group' %}"
+                   class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-center">
+                    创建新的学习小组
+                </a>
+            </div>
+        </div>
 
-                    <div id="searchResults">
-                        {% if search_results %}
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">搜索和加入组</h2>
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <form method="GET" action="{% url 'group_management' %}" class="mb-4">
+                    <div class="flex">
+                        <input type="text" name="search" placeholder="搜索组名"
+                               class="flex-grow border rounded-l px-4 py-2">
+                        <button type="submit"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">搜索
+                        </button>
+                    </div>
+                </form>
+
+                <div id="searchResults">
+                    {% if search_results %}
+                        <ul>
                             {% for group in search_results %}
-                                <div class="mb-2">
-                                    {{ group.name }}
+                                <li class="flex justify-between items-center mb-2 border-b pb-2">
+                                    <span>{{ group.name }}</span>
                                     {% if request.user in group.members.all %}
                                         <span class="text-green-500">已加入</span>
                                     {% else %}
@@ -55,39 +58,40 @@
                                                 class="text-green-500 hover:text-green-700">申请加入
                                         </button>
                                     {% endif %}
-                                </div>
+                                </li>
                             {% endfor %}
-                        {% elif search_performed %}
-                            <p>没有找到匹配的组。</p>
-                        {% else %}
-                            <p>使用上面的搜索框查找组。</p>
-                        {% endif %}
-                    </div>
+                        </ul>
+                    {% elif search_performed %}
+                        <p>没有找到匹配的组。</p>
+                    {% else %}
+                        <p>使用上面的搜索框查找组。</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        function joinGroup(groupId) {
-            fetch(`/groups/join_group/${groupId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': '{{ csrf_token }}'
+<script>
+    function joinGroup(groupId) {
+        fetch(`/groups/join_group/${groupId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // 刷新页面以更新组列表
+                } else {
+                    alert(data.message);
                 }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        location.reload(); // 刷新页面以更新组列表
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    </script>
+            .catch(error => console.error('Error:', error));
+    }
+</script>
 
 {% endblock %}
