@@ -1,11 +1,14 @@
+import json
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from groups.models import Group
 from shareplatform import settings
 from user.models import User
-from .models import Question, QuestionSet
+from .models import Question, QuestionSet, UserAnswer
 from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
 import pytesseract
 from PIL import Image, ImageFilter, ImageEnhance
@@ -163,3 +166,61 @@ def remove_question_from_set(request, question_set_id, question_id):
         question_set.questions.remove(question)
         return JsonResponse({'success': True, 'message': '问题已从题单中删除'})
     return JsonResponse({'success': False, 'message': '请求无效'})
+
+
+@login_required
+def practice_question_set(request, question_set_id):
+    question_set = get_object_or_404(QuestionSet, id=question_set_id)
+    questions = question_set.questions.all()
+    questions_data = [
+        {
+            'id': question.id,
+            'title': question.title,
+            'description': question.description,
+            'description_image': question.description_image.url if question.description_image else None,
+            'image': question.image.url if question.image else None,
+            'correct_answer': question.correct_answer,
+            'correct_answer_image': question.correct_answer_image.url if question.correct_answer_image else None,
+        }
+        for question in questions
+    ]
+    return render(request, 'questions/practice_question_set.html', {
+        'question_set': question_set,
+        'questions': questions_data,
+    })
+
+
+@login_required
+def check_answer(request, question_id):
+    if request.method == 'POST':
+        user = request.user
+        question = get_object_or_404(Question, id=question_id)
+        data = json.loads(request.body)
+        is_correct = data.get('is_correct')
+        wrong_answer_reason = data.get('wrong_answer_reason', '')
+
+        UserAnswer.objects.create(
+            user=user,
+            question=question,
+            is_correct=is_correct,
+            wrong_answer_reason=wrong_answer_reason
+        )
+
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
+
+
+@login_required
+def question_set_list(request):
+    user = request.user
+    created_question_sets = QuestionSet.objects.filter(creator=user).distinct()
+    group_ids = list(user.groups.values_list('id', flat=True))
+    group_question_sets = QuestionSet.objects.filter(shared_with_groups__in=group_ids).prefetch_related(
+        'shared_with_groups').distinct()
+    public_question_sets = QuestionSet.objects.filter(is_public=True).distinct()
+    accessible_question_sets = created_question_sets | group_question_sets | public_question_sets
+    accessible_question_sets = accessible_question_sets.distinct()
+
+    return render(request, 'questions/question_set_list.html', {
+        'question_sets': accessible_question_sets
+    })

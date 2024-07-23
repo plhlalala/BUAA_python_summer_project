@@ -1,0 +1,137 @@
+{% extends "basehome.html" %}
+{% block title %}练习题单{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">{{ question_set.name }}</h1>
+        <div id="questions" class="space-y-8">
+            {% for question in questions %}
+                <div class="question bg-white shadow-lg rounded-lg p-6" id="question-{{ question.id }}">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ question.title }}</h2>
+                    {% if question.description_image %}
+                        <img src="{{ question.description_image }}" alt="Description Image"
+                             class="w-full mb-4 rounded-lg">
+                    {% else %}
+                        <p class="text-gray-700 mb-4">{{ question.description }}</p>
+                    {% endif %}
+                    {% if question.image %}
+                        <img src="{{ question.image }}" alt="Question Image" class="w-full mb-4 rounded-lg">
+                    {% endif %}
+
+                    <button onclick="showAnswer({{ question.id }})"
+                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg mx-auto block">
+                        查看答案
+                    </button>
+                    <div class="answer hidden mt-4" id="answer-{{ question.id }}">
+                        {% if question.correct_answer_image %}
+                            <img src="{{ question.correct_answer_image }}" alt="Correct Answer Image"
+                                 class="w-full mb-4 rounded-lg">
+                        {% else %}
+                            <p class="text-gray-700 mb-4">{{ question.correct_answer }}</p>
+                        {% endif %}
+                        <div class="flex justify-around mt-4">
+                            <button onclick="recordAnswer({{ question.id }}, true)"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                                正确
+                            </button>
+                            <button onclick="showErrorReasonPrompt({{ question.id }})"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                                错误
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 错误原因对话框 -->
+    <div id="error-reason-dialog" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-1/3">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">记录错误原因</h2>
+            <textarea id="error-reason" class="form-textarea mt-1 block w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="可选"></textarea>
+            <div class="flex justify-end mt-4">
+                <button onclick="closeErrorReasonDialog()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">取消</button>
+                <button onclick="submitErrorReason()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestionId = null;
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showAnswer(questionId) {
+            document.getElementById('answer-' + questionId).classList.remove('hidden');
+        }
+
+        function showErrorReasonPrompt(questionId) {
+            currentQuestionId = questionId;
+            document.getElementById('error-reason').value = '';
+            document.getElementById('error-reason-dialog').classList.remove('hidden');
+        }
+
+        function closeErrorReasonDialog() {
+            document.getElementById('error-reason-dialog').classList.add('hidden');
+        }
+
+        function submitErrorReason() {
+            const wrongAnswerReason = document.getElementById('error-reason').value;
+            recordAnswer(currentQuestionId, false, wrongAnswerReason);
+            closeErrorReasonDialog();
+        }
+
+        function recordAnswer(questionId, isCorrect, wrongAnswerReason = '') {
+            // 获取当前问题的正确和错误按钮
+            const correctBtn = document.querySelector(`button[onclick="recordAnswer(${questionId}, true)"]`);
+            const incorrectBtn = document.querySelector(`button[onclick="showErrorReasonPrompt(${questionId})"]`);
+
+            // 立即禁用两个按钮，防止多次提交
+            if (correctBtn) correctBtn.disabled = true;
+            if (incorrectBtn) incorrectBtn.disabled = true;
+
+            // AJAX调用，向服务器记录答案
+            fetch(`/questions/check_answer/${questionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    is_correct: isCorrect,
+                    wrong_answer_reason: wrongAnswerReason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`问题 ${questionId} 的答案记录为：${isCorrect ? '正确' : '错误'}`);
+                    // 可选，处理响应数据，例如向用户显示消息
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('错误:', error);
+                // 出错时重新启用按钮，以便用户可以再次尝试
+                if (correctBtn) correctBtn.disabled = false;
+                if (incorrectBtn) incorrectBtn.disabled = false;
+                alert('记录答案失败，请重试。');
+            });
+        }
+    </script>
+{% endblock %}

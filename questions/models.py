@@ -36,3 +36,11 @@ class QuestionSet(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserAnswer(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    wrong_answer_reason = models.TextField(blank=True)
+    is_correct = models.BooleanField()
+    timestamp = models.DateTimeField(auto_now_add=True)

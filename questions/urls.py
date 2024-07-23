@@ -14,4 +14,8 @@ urlpatterns = [
          name='remove_question_from_set'),
     path('delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
     path('share_question_set/<int:question_set_id>/', views.share_question_set, name='share_question_set'),
+    path('practice_question_set/<int:question_set_id>/', views.practice_question_set, name='practice_question_set'),
+    path('check_answer/<int:question_id>/', views.check_answer, name='check_answer'),
+    path('question_sets/', views.question_set_list, name='question_set_list'),
+    # path('error_log/', views.generate_error_log, name='generate_error_log'),
 ]
