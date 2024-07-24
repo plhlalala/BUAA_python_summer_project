@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var subjectAnswersData = {
         labels: [{% for item in subject_answers %}'{{ item.subject }}',{% endfor %}],
         datasets: [{
-            label: '用户最喜欢做什么题',
+            label: '做题科目分布',
             data: [{% for item in subject_answers %}{{ item.count }},{% endfor %}],
             backgroundColor: 'rgba(153, 102, 255, 0.2)',
             borderColor: 'rgba(153, 102, 255, 1)',
