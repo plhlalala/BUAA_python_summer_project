@@ -61,7 +61,7 @@ def create_question(request):
 @login_required
 def ocr_image(request):
     if request.method == 'POST' and request.FILES.get('ocr_image'):
-        pytesseract.pytesseract.tesseract_cmd = r'D:\tesseract\tesseract.exe'
+        pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
         image = request.FILES['ocr_image']
         img = Image.open(image)
         img = img.convert('L')  # 转换为灰度图
