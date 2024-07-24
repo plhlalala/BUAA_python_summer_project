@@ -1,5 +1,6 @@
 import json
 
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -8,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from groups.models import Group
 from shareplatform import settings
 from user.models import User
+from . import models
 from .models import Question, QuestionSet, UserAnswer
 from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
 import pytesseract
@@ -236,4 +238,27 @@ def question_set_list(request):
         'questions': questions,
         'search_performed': search_performed,
         'search_query': search_query
+    })
+
+
+@login_required
+def review_mistakes(request):
+    user = request.user
+    wrong_answers = UserAnswer.objects.filter(user=user, is_correct=False).order_by('-timestamp')
+
+    paginator = Paginator(wrong_answers, 5)  # 每页显示5个错题
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # # 假设错题推荐逻辑为最近错题中错误次数最多的题目
+    # recommended_questions = (UserAnswer.objects.filter(user=user, is_correct=False)
+    #                          .values('question')
+    #                          .annotate(wrong_count=models.Count('id'))
+    #                          .order_by('-wrong_count')[:5])
+    #
+    # recommended_questions = [Question.objects.get(id=item['question']) for item in recommended_questions]
+
+    return render(request, 'questions/review_mistakes.html', {
+        'page_obj': page_obj,
+        #'recommended_questions': recommended_questions
     })

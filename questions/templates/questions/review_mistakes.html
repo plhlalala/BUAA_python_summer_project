@@ -1,0 +1,64 @@
+{% extends "basehome.html" %}
+{% block title %}错题回顾{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">错题回顾</h1>
+
+    <!-- 最近错题 -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">最近错题</h2>
+        {% if page_obj.object_list %}
+            <div class="space-y-4">
+                {% for answer in page_obj.object_list %}
+                    <div class="bg-white shadow-lg rounded-lg p-4 mb-2">
+                        <a href="{% url 'question_detail' answer.question.id %}" class="text-blue-500 hover:text-blue-700 text-lg font-semibold">
+                            {{ answer.question.title }}
+                        </a>
+                        <p class="text-gray-700 mt-2">{{ answer.wrong_answer_reason }}</p>
+                        <p class="text-gray-700 mt-2">{{ answer.timestamp }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- 分页控件 -->
+            <div class="mt-4">
+                <span class="block text-sm text-gray-700">
+                    第 {{ page_obj.number }} 页，共 {{ page_obj.paginator.num_pages }} 页
+                </span>
+                <div class="flex justify-center mt-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            上一页
+                        </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 ml-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            下一页
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-red-500">没有错题记录。</p>
+        {% endif %}
+    </div>
+
+    <!-- 错题推荐 -->
+    <div>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">错题推荐</h2>
+        {% if recommended_questions %}
+            <div class="space-y-4">
+                {% for question in recommended_questions %}
+                    <div class="bg-white shadow-lg rounded-lg p-4 mb-2">
+                        <a href="{% url 'question_detail' question.id %}" class="text-blue-500 hover:text-blue-700 text-lg font-semibold">
+                            {{ question.title }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-red-500">没有推荐的错题。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
