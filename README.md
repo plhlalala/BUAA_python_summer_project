@@ -57,4 +57,4 @@ python manage.py runserver
 
 ## 使用说明
 
-- OCR 功能需要将相关路径配置为本地路径。请根据您的环境修改 `settings.py` 中的相关配置。
+- OCR 功能需要将相关路径配置为本地路径。请根据您的环境修改 `questions/views.py` 中 `ocr_image`中`pytesseract.pytesseract.tesseract_cmd` 中的相关配置。
