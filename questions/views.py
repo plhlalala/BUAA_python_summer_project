@@ -1,20 +1,23 @@
 import json
 
 from django.core.paginator import Paginator
+from django.db.models.functions import TruncDate
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from groups.models import Group
-from shareplatform import settings
-from user.models import User
 from . import models
 from .models import Question, QuestionSet, UserAnswer
 from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
 import pytesseract
-from PIL import Image, ImageFilter, ImageEnhance
-
+from PIL import Image, ImageEnhance
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import UserAnswer, Question
+from django.db.models import Count, Avg, Q
+from django.utils import timezone
+import datetime
+from .models import SUBJECT_CHOICES
 
 @login_required
 def question_management(request):
@@ -241,24 +244,78 @@ def question_set_list(request):
     })
 
 
+
 @login_required
 def review_mistakes(request):
     user = request.user
+    selected_subject = request.GET.get('subject')
+    num_questions = int(request.GET.get('num_questions', 5))
     wrong_answers = UserAnswer.objects.filter(user=user, is_correct=False).order_by('-timestamp')
-
     paginator = Paginator(wrong_answers, 5)  # 每页显示5个错题
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # # 假设错题推荐逻辑为最近错题中错误次数最多的题目
-    # recommended_questions = (UserAnswer.objects.filter(user=user, is_correct=False)
-    #                          .values('question')
-    #                          .annotate(wrong_count=models.Count('id'))
-    #                          .order_by('-wrong_count')[:5])
-    #
-    # recommended_questions = [Question.objects.get(id=item['question']) for item in recommended_questions]
+    mistakes = wrong_answers.filter(question__subject=selected_subject)
+    mistakes_count = mistakes.values('question').annotate(total=Count('id')).filter(total__gte=2)
+    high_mistake_questions = Question.objects.filter(id__in=[item['question'] for item in mistakes_count])
+    if high_mistake_questions.count() < num_questions:
+        recent_mistakes = mistakes.order_by('-timestamp')[:num_questions]
+        recent_mistake_question_ids = [mistake.question_id for mistake in recent_mistakes]
+        question_sets = QuestionSet.objects.filter(questions__in=recent_mistake_question_ids).distinct()
+        additional_questions = Question.objects.filter(question_sets__in=question_sets,
+                                                       subject=selected_subject).exclude(
+            id__in=high_mistake_questions).distinct()
+        recommended_questions = list(high_mistake_questions) + list(additional_questions)[
+                                                               :num_questions - high_mistake_questions.count()]
+    else:
+        recommended_questions = high_mistake_questions[:num_questions]
 
     return render(request, 'questions/review_mistakes.html', {
         'page_obj': page_obj,
-        #'recommended_questions': recommended_questions
+        'recommended_questions': recommended_questions,
+        'subject_choices': SUBJECT_CHOICES,
+        'selected_subject': selected_subject,
+        'num_questions': num_questions
+    })
+
+
+@login_required
+def user_statistics(request):
+    user = request.user
+
+    # 获取用户最近30天的答题数据
+    today = timezone.now().date()
+    last_30_days = today - datetime.timedelta(days=30)
+    answers = UserAnswer.objects.filter(user=user, timestamp__date__gte=last_30_days)
+
+    # 每日做题数目
+    daily_answers = answers.annotate(date=TruncDate('timestamp')).values('date').annotate(count=Count('id')).order_by(
+        'date')
+
+    # 每日做题正确率
+    daily_correct_rate = answers.annotate(date=TruncDate('timestamp')).values('date').annotate(
+        correct_rate=Avg('is_correct')).order_by('date')
+    daily_correct_rate = [{'date': item['date'], 'correct_rate': item['correct_rate'] * 100} for item in
+                          daily_correct_rate]
+
+    # 用户最喜欢做什么题的雷达图数据
+    subject_answers = answers.values('question__subject').annotate(count=Count('id')).order_by('-count')
+
+    # 错题科目分布图
+    subject_mistakes = answers.filter(is_correct=False).values('question__subject').annotate(
+        count=Count('id')).order_by('-count')
+
+    # 将科目翻译为中文
+    subject_translation = dict(SUBJECT_CHOICES)
+    subject_answers = [{'subject': subject_translation[item['question__subject']], 'count': item['count']} for item in
+                       subject_answers]
+    subject_mistakes = [{'subject': subject_translation[item['question__subject']], 'count': item['count']} for item in
+                        subject_mistakes]
+
+    return render(request, 'questions/user_statistics.html', {
+        'daily_answers': daily_answers,
+        'daily_correct_rate': daily_correct_rate,
+        'subject_answers': subject_answers,
+        'subject_mistakes': subject_mistakes,
+        'subject_choices': SUBJECT_CHOICES,
     })

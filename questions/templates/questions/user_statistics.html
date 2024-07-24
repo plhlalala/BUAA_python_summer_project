@@ -1,0 +1,226 @@
+{% extends "basehome.html" %}
+{% block title %}学生能力可视化{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">学生能力可视化</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- 每日做题数目 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">每日做题数目</h2>
+            <canvas id="dailyAnswersChart"></canvas>
+        </div>
+
+        <!-- 每日做题正确率 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">每日做题正确率</h2>
+            <canvas id="dailyCorrectRateChart"></canvas>
+        </div>
+
+        <!-- 用户最喜欢做什么题的雷达图 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">做题科目分布图</h2>
+            <canvas id="subjectAnswersChart"></canvas>
+        </div>
+
+        <!-- 错题科目分布图 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">错题科目分布图</h2>
+            <canvas id="subjectMistakesChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 每日做题数目
+    var dailyAnswersCtx = document.getElementById('dailyAnswersChart').getContext('2d');
+    var dailyAnswersData = {
+        labels: [{% for item in daily_answers %}'{{ item.date }}',{% endfor %}],
+        datasets: [{
+            label: '每日做题数目',
+            data: [{% for item in daily_answers %}{{ item.count }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            hoverBackgroundColor: 'rgba(54, 162, 235, 0.4)'
+        }]
+    };
+    var dailyAnswersChart = new Chart(dailyAnswersCtx, {
+        type: 'bar',
+        data: dailyAnswersData,
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                },
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '日期'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '题数'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutBounce'
+            }
+        }
+    });
+
+    // 每日做题正确率
+    var dailyCorrectRateCtx = document.getElementById('dailyCorrectRateChart').getContext('2d');
+    var dailyCorrectRateData = {
+        labels: [{% for item in daily_correct_rate %}'{{ item.date }}',{% endfor %}],
+        datasets: [{
+            label: '每日做题正确率',
+            data: [{% for item in daily_correct_rate %}{{ item.correct_rate }},{% endfor %}],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    var dailyCorrectRateChart = new Chart(dailyCorrectRateCtx, {
+        type: 'line',
+        data: dailyCorrectRateData,
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                },
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '日期'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: '正确率 (%)'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutBounce'
+            }
+        }
+    });
+
+    // 用户最喜欢做什么题的雷达图
+    var subjectAnswersCtx = document.getElementById('subjectAnswersChart').getContext('2d');
+    var subjectAnswersData = {
+        labels: [{% for item in subject_answers %}'{{ item.subject }}',{% endfor %}],
+        datasets: [{
+            label: '用户最喜欢做什么题',
+            data: [{% for item in subject_answers %}{{ item.count }},{% endfor %}],
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1,
+            pointBackgroundColor: 'rgba(153, 102, 255, 1)',
+            pointHoverBackgroundColor: 'rgba(153, 102, 255, 0.5)'
+        }]
+    };
+    var subjectAnswersChart = new Chart(subjectAnswersCtx, {
+        type: 'radar',
+        data: subjectAnswersData,
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                },
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    pointLabels: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutBounce'
+            }
+        }
+    });
+
+    // 错题科目分布图
+    var subjectMistakesCtx = document.getElementById('subjectMistakesChart').getContext('2d');
+    var subjectMistakesData = {
+        labels: [{% for item in subject_mistakes %}'{{ item.subject }}',{% endfor %}],
+        datasets: [{
+            label: '错题科目分布',
+            data: [{% for item in subject_mistakes %}{{ item.count }},{% endfor %}],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            hoverBackgroundColor: 'rgba(255, 99, 132, 0.4)'
+        }]
+    };
+    var subjectMistakesChart = new Chart(subjectMistakesCtx, {
+        type: 'bar',
+        data: subjectMistakesData,
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                },
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '科目'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '错题数'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutBounce'
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

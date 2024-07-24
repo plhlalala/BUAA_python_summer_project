@@ -18,5 +18,5 @@ urlpatterns = [
     path('check_answer/<int:question_id>/', views.check_answer, name='check_answer'),
     path('question_sets/', views.question_set_list, name='question_set_list'),
     path('review_mistakes/', views.review_mistakes, name='review_mistakes'),
-    # path('error_log/', views.generate_error_log, name='generate_error_log'),
+    path('visualization/',views.user_statistics,name='visualization')
 ]
