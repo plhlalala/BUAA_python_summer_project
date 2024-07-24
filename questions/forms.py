@@ -5,7 +5,7 @@ from .models import Question, QuestionSet
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['title', 'description', 'format', 'image', 'correct_answer']
+        fields = ['title', 'description', 'format', 'image', 'correct_answer', 'subject']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,7 +15,7 @@ class QuestionForm(forms.ModelForm):
 class QuestionPictureForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ['title', 'description_image', 'format', 'image', 'correct_answer_image']
+        fields = ['title', 'description_image', 'format', 'image', 'correct_answer_image', 'subject']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

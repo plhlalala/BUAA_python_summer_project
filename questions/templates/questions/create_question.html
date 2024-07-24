@@ -19,6 +19,15 @@
                     <option value="image">图片</option>
                 </select>
             </div>
+            <div class="mb-4">
+                <label for="subject" class="block text-gray-700 font-bold mb-2">科目</label>
+                <select id="subject" name="subject" class="form-select mt-1 block w-full border rounded" required>
+                    {% for subject in SUBJECT_CHOICES %}
+                        <option value="{{ subject.0 }}">{{ subject.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div id="textOptions">
                 <div class="mb-4">
                     <label for="description" class="block text-gray-700 font-bold mb-2">题目描述</label>
@@ -96,6 +105,34 @@
 
     // 初始化时调用
     toggleOCROptions();
+
+    document.getElementById('questionForm').onsubmit = function() {
+    const format = document.getElementById('format').value;
+    let isValid = true;
+    let errorMessage = '';
+
+    if (format === 'text') {
+        const description = document.getElementById('description').value.trim();
+        const correctAnswer = document.getElementById('correct_answer').value.trim();
+        if (!description || !correctAnswer) {
+            isValid = false;
+            errorMessage = '请填写题目描述和参考答案。';
+        }
+    } else if (format === 'image') {
+        const descriptionImage = document.getElementById('image_description').files.length;
+        const correctAnswerImage = document.getElementById('image_answer').files.length;
+        if (!descriptionImage || !correctAnswerImage) {
+            isValid = false;
+            errorMessage = '请上传题目描述图片和参考答案图片。';
+        }
+    }
+
+    if (!isValid) {
+        alert(errorMessage);
+    }
+    return isValid;
+};
+
 </script>
 
 {% endblock %}

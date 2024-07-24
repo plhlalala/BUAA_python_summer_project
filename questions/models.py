@@ -3,6 +3,26 @@ from django.conf import settings
 
 from groups.models import Group
 
+SUBJECT_CHOICES = [
+    ('math_analysis_1', '数学分析上'),
+    ('math_analysis_2', '数学分析下'),
+    ('linear_algebra', '线性代数'),
+    ('physics_1', '大学物理上'),
+    ('physics_2', '大学物理下'),
+    ('discrete_math_1', '离散数学1'),
+    ('discrete_math_2', '离散数学2'),
+    ('discrete_math_3', '离散数学3'),
+    ('probability_theory', '概率论与数理统计'),
+    ('computer_organization', '计算机组成'),
+    ('data_structure', '数据结构'),
+    ('algorithm', '算法设计与分析'),
+    ('operating_system', '操作系统'),
+    ('database', '数据库系统'),
+    ('computer_network', '计算机网络'),
+    ('compiler', '编译原理'),
+    ('others', '其他')
+]
+
 
 class Question(models.Model):
     TEXT = 'text'
@@ -21,6 +41,7 @@ class Question(models.Model):
     correct_answer_image = models.ImageField(upload_to='questions/', blank=True, null=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_questions', blank=True)
+    subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
 
     def __str__(self):
         return self.title

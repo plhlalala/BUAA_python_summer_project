@@ -52,7 +52,7 @@ def create_question(request):
             return redirect('question_detail', question_id=question.id)
     else:
         form = QuestionForm()
-    return render(request, 'questions/create_question.html', {'form': form})
+    return render(request, 'questions/create_question.html', {'form': form, 'SUBJECT_CHOICES': models.SUBJECT_CHOICES})
 
 
 @login_required
