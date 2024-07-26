@@ -25,6 +25,7 @@
                 {% endfor %}
             </ul>
         </div>
+
         {% if request.user == question_set.creator %}
             <div class="flex justify-between">
                 <div class="bg-white shadow-md rounded-lg p-6 mb-6 w-full lg:w-1/2 mr-2">
@@ -77,29 +78,38 @@
                 </div>
             </div>
 
-            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">共享题单</h2>
-                <form id="share-form" method="post" action="{% url 'share_question_set' question_set.id %}">
-                    {% csrf_token %}
-                    <label for="shared_groups" class="block text-gray-700 font-bold mb-2">共享给组：</label>
-                    <select id="shared_groups" name="group_ids" multiple
-                            class="form-multiselect block w-full mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        {% for group in all_groups %}
-                            <option value="{{ group.id }}"
-                                    {% if group in question_set.shared_with_groups.all %}selected{% endif %}>
-                                {{ group.name }}{% if group in question_set.shared_with_groups.all %}
-                                    (已共享){% endif %}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="flex items-center mt-4">
-                        <input type="checkbox" id="is_public" name="is_public" class="mr-2"
-                               {% if question_set.is_public %}checked{% endif %}>
-                        <label for="is_public" class="text-gray-700">公开共享</label>
-                    </div>
-                    <button type="button" onclick="shareQuestionSet('{{ question_set.id }}')"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4">共享题单
+            <div class="flex justify-between mb-6">
+                <div class="bg-white shadow-md rounded-lg p-6 w-full lg:w-1/2 mr-2">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">共享题单</h2>
+                    <form id="share-form" method="post" action="{% url 'share_question_set' question_set.id %}">
+                        {% csrf_token %}
+                        <label for="shared_groups" class="block text-gray-700 font-bold mb-2">共享给组：</label>
+                        <select id="shared_groups" name="group_ids" multiple
+                                class="form-multiselect block w-full mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% for group in all_groups %}
+                                <option value="{{ group.id }}"
+                                        {% if group in question_set.shared_with_groups.all %}selected{% endif %}>
+                                    {{ group.name }}{% if group in question_set.shared_with_groups.all %}
+                                        (已共享){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="flex items-center mt-4">
+                            <input type="checkbox" id="is_public" name="is_public" class="mr-2"
+                                   {% if question_set.is_public %}checked{% endif %}>
+                            <label for="is_public" class="text-gray-700">公开共享</label>
+                        </div>
+                        <button type="button" onclick="shareQuestionSet('{{ question_set.id }}')"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4">共享题单
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white shadow-md rounded-lg p-6 w-full lg:w-1/2 ml-2">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">删除题单</h2>
+                    <button type="button" onclick="deleteQuestionSet('{{ question_set.id }}')"
+                            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4">删除题单
                     </button>
-                </form>
+                </div>
             </div>
         {% endif %}
     </div>
@@ -183,6 +193,28 @@
                     }
                 })
                 .catch(error => console.error('Error:', error));
+        }
+
+        function deleteQuestionSet(questionSetId) {
+            if (confirm('确定要删除这个题单吗？')) {
+                fetch(`/questions/delete_question_set/${questionSetId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.href = '/questions/management/'; // 重定向到题单列表页面
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         }
     </script>
 

@@ -18,5 +18,6 @@ urlpatterns = [
     path('check_answer/<int:question_id>/', views.check_answer, name='check_answer'),
     path('question_sets/', views.question_set_list, name='question_set_list'),
     path('review_mistakes/', views.review_mistakes, name='review_mistakes'),
-    path('visualization/',views.user_statistics,name='visualization')
+    path('visualization/',views.user_statistics,name='visualization'),
+    path('delete_question_set/<int:question_set_id>/', views.delete_question_set, name='delete_question_set'),
 ]

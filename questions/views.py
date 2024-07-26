@@ -103,6 +103,15 @@ def share_question_set(request, question_set_id):
 
 
 @login_required
+def delete_question_set(request, question_set_id):
+    question_set = get_object_or_404(QuestionSet, id=question_set_id, creator=request.user)
+    if request.method == 'POST':
+        question_set.delete()
+        return JsonResponse({'success': True, 'message': '题单已删除'})
+    return JsonResponse({'success': False, 'message': '请求无效'})
+
+
+@login_required
 def share_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     if request.method == 'POST':
