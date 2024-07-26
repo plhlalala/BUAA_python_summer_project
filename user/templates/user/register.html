@@ -25,4 +25,31 @@
         </form>
     </div>
 </div>
+
+<style>
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="date"],
+    select {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        color: #333;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="email"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+        border-color: #38a169;
+        box-shadow: 0 0 5px rgba(56, 161, 105, 0.5);
+        outline: none;
+    }
+</style>
 {% endblock %}

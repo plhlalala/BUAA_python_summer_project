@@ -14,7 +14,7 @@
       <div class="md:flex">
         <div class="md:w-1/3 px-4 py-5 bg-gray-50 sm:p-6">
           <div class="text-center">
-            <img id="avatar-preview" src="{% if user.avatar %}{{ user.avatar.url }}{% else %}{% static 'user/images/default.jpg' %}{% endif %}" alt="User avatar" class="mx-auto h-32 w-32 rounded-full object-cover">
+            <img id="avatar-preview" src="{% if user.avatar %}{{ user.avatar.url }}{% else %}{% static 'user/images/default.jpg' %}{% endif %}" alt="User avatar" class="mx-auto h-32 w-32 rounded-full object-cover border-2 border-gray-300 shadow-md">
             <label for="{{ form.avatar.id_for_label }}" class="mt-2 cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               更改头像
               {{ form.avatar|add_class:"sr-only" }}
@@ -25,45 +25,45 @@
           <div class="grid grid-cols-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
               <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">用户名</label>
-              {{ form.username|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" }}
+              {{ form.username|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" }}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">电子邮箱</label>
-              {{ form.email|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" }}
+              {{ form.email|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" }}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="first_name" class="block text-sm font-medium text-gray-700">名字</label>
-              {% render_field form.first_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %}
+              {% render_field form.first_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="last_name" class="block text-sm font-medium text-gray-700">姓氏</label>
-              {% render_field form.last_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %}
+              {% render_field form.last_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
             </div>
             <div class="col-span-6">
               <label for="bio" class="block text-sm font-medium text-gray-700">个人简介</label>
-              {% render_field form.bio class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %}
+              {% render_field form.bio class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="date_of_birth" class="block text-sm font-medium text-gray-700">出生日期</label>
-              {% render_field form.date_of_birth class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" type="date" %}
+              {% render_field form.date_of_birth class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" type="date" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="location" class="block text-sm font-medium text-gray-700">所在地</label>
-              {% render_field form.location class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %}
+              {% render_field form.location class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
             </div>
             <div class="col-span-6">
               <label for="education" class="block text-sm font-medium text-gray-700">教育背景</label>
-              {% render_field form.education class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %}
+              {% render_field form.education class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
             </div>
           </div>
         </div>
-      </div> <!-- 闭合 md:flex 的 <div> -->
+      </div>
       <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
         <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           保存
         </button>
       </div>
     </form>
-  </div> <!-- 闭合 border-t border-gray-200 的 <div> -->
-</div> <!-- 闭合 bg-white shadow overflow-hidden sm:rounded-lg 的 <div> -->
+  </div>
+</div>
 {% endblock %}
