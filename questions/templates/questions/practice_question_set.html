@@ -40,6 +40,7 @@
                             </button>
                         </div>
                     </div>
+                    <div id="feedback-{{ question.id }}" class="mt-4 text-green-500 text-center hidden">已记录</div>
                 </div>
             {% endfor %}
         </div>
@@ -120,7 +121,12 @@
             .then(data => {
                 if (data.success) {
                     console.log(`问题 ${questionId} 的答案记录为：${isCorrect ? '正确' : '错误'}`);
-                    // 可选，处理响应数据，例如向用户显示消息
+                    // 显示反馈信息
+                    const feedbackElement = document.getElementById('feedback-' + questionId);
+                    feedbackElement.classList.remove('hidden');
+                    setTimeout(() => {
+                        feedbackElement.classList.add('hidden');
+                    }, 2000);
                 } else {
                     throw new Error(data.message);
                 }
