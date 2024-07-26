@@ -220,14 +220,15 @@ def check_answer(request, question_id):
 def question_set_list(request):
     user = request.user
     search_query = request.GET.get('search', '')
-
-    created_question_sets = QuestionSet.objects.filter(creator=user).distinct()
+    # 获取用户所在的小组的 ID 列表
     group_ids = list(user.groups.values_list('id', flat=True))
-    group_question_sets = QuestionSet.objects.filter(shared_with_groups__in=group_ids).prefetch_related(
-        'shared_with_groups').distinct()
-    public_question_sets = QuestionSet.objects.filter(is_public=True).distinct()
-    accessible_question_sets = created_question_sets | group_question_sets | public_question_sets
-    accessible_question_sets = accessible_question_sets.distinct()
+    # 合并三个查询集并去重
+    # 使用Q对象和distinct()确保去重
+    accessible_question_sets = QuestionSet.objects.filter(
+        Q(creator=user) |
+        Q(shared_with_groups__in=group_ids) |
+        Q(is_public=True)
+    ).distinct()
 
     if search_query:
         questions = Question.objects.filter(title__icontains=search_query,
