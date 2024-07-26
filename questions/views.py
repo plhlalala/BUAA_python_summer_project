@@ -94,7 +94,8 @@ def share_question_set(request, question_set_id):
         group_ids = request.POST.getlist('group_ids')
         groups = Group.objects.filter(id__in=group_ids)
         question_set.shared_with_groups.set(groups)
-        is_public = request.POST.get('is_public') == 'true'
+        # 处理复选框的值
+        is_public = request.POST.get('is_public') == 'on'
         question_set.is_public = is_public
         question_set.save()
         return JsonResponse({'success': True, 'message': '题组已共享'})
