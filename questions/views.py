@@ -19,6 +19,7 @@ from django.utils import timezone
 import datetime
 from .models import SUBJECT_CHOICES
 
+
 @login_required
 def question_management(request):
     search_query = request.GET.get('search', '')
@@ -244,7 +245,6 @@ def question_set_list(request):
     })
 
 
-
 @login_required
 def review_mistakes(request):
     user = request.user
@@ -298,7 +298,23 @@ def user_statistics(request):
     daily_correct_rate = [{'date': item['date'], 'correct_rate': item['correct_rate'] * 100} for item in
                           daily_correct_rate]
 
-    # 用户最喜欢做什么题的雷达图数据
+    # 最近7天的正确率
+    last_7_days = today - datetime.timedelta(days=7)
+    recent_answers = answers.filter(timestamp__date__gte=last_7_days)
+    recent_correct_rate = recent_answers.aggregate(average_correct_rate=Avg('is_correct'))[
+                              'average_correct_rate'] * 100 if recent_answers.exists() else 0
+
+    # 鼓励语
+    if recent_correct_rate >= 90:
+        encouragement = "你的表现非常出色，继续保持！"
+    elif recent_correct_rate >= 70:
+        encouragement = "你的进步很大，继续努力！"
+    elif recent_correct_rate >= 50:
+        encouragement = "你在逐渐进步，加油！"
+    else:
+        encouragement = "不要灰心，继续努力，你会看到进步的！"
+
+    # 用户最喜欢做什么题的饼形图数据
     subject_answers = answers.values('question__subject').annotate(count=Count('id')).order_by('-count')
 
     # 错题科目分布图
@@ -318,4 +334,5 @@ def user_statistics(request):
         'subject_answers': subject_answers,
         'subject_mistakes': subject_mistakes,
         'subject_choices': SUBJECT_CHOICES,
+        'encouragement': encouragement
     })
