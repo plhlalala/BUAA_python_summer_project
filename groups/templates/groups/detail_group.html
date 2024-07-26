@@ -55,7 +55,8 @@
                     <ul>
                         {% for question_set in shared_question_sets %}
                             <li class="mb-2">
-                                <a href="{% url 'question_set_detail' question_set.id %}" class="text-blue-500 hover:text-blue-700">{{ question_set.name }}</a>
+                                <a href="{% url 'question_set_detail' question_set.id %}"
+                                   class="text-blue-500 hover:text-blue-700">{{ question_set.name }}</a>
                             </li>
                         {% empty %}
                             <li>暂无共享的题单。</li>
@@ -72,82 +73,86 @@
                     <form id="share-question-set-form" method="post" action="{% url 'share_question_set' group.id %}">
                         {% csrf_token %}
                         <label for="question_sets" class="block text-gray-700 font-bold mb-2">选择题单：</label>
-                        <select id="question_sets" name="question_set_ids" multiple class="form-multiselect block w-full mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select id="question_sets" name="question_set_ids" multiple
+                                class="form-multiselect block w-full mt-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             {% for question_set in all_question_sets %}
-                            <option value="{{ question_set.id }}" {% if group in question_set.shared_with_groups.all %}selected{% endif %}>
-                                {{ question_set.name }}{% if group in question_set.shared_with_groups.all %} (已共享){% endif %}
-                            </option>
+                                <option value="{{ question_set.id }}"
+                                        {% if group in question_set.shared_with_groups.all %}selected{% endif %}>
+                                    {{ question_set.name }}{% if group in question_set.shared_with_groups.all %}
+                                        (已共享){% endif %}
+                                </option>
                             {% endfor %}
                         </select>
-                        <button type="button" onclick="shareQuestionSet('{{ group.id }}')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4">共享题单</button>
+                        <button type="button" onclick="shareQuestionSetInGroup('{{ group.id }}')"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4">共享题单
+                        </button>
                     </form>
                 </div>
             </div>
         {% endif %}
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const joinGroupBtn = document.getElementById('joinGroupBtn');
-            const leaveGroupBtn = document.getElementById('leaveGroupBtn');
+    <script> function shareQuestionSetInGroup(groupId) {
+        const form = document.getElementById('share-question-set-form');
+        const formData = new FormData(form);
 
-            if (joinGroupBtn) {
-                joinGroupBtn.addEventListener('click', () => handleGroupAction('join'));
+        fetch(`/groups/share_question_set/${groupId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
             }
-
-            if (leaveGroupBtn) {
-                leaveGroupBtn.addEventListener('click', () => handleGroupAction('leave'));
-            }
-
-            function handleGroupAction(action) {
-                const groupId = {{ group.id }};
-                const url = action === 'join' ? `/groups/join_group/${groupId}/` : `/groups/leave_group/${groupId}/`;
-                const confirmMessage = action === 'join' ? "您确定要加入这个组吗？" : "您确定要退出这个组吗？";
-
-                if (confirm(confirmMessage)) {
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.href = data.redirect_url; // 跳转到组管理页面
-                            } else {
-                                alert(data.message);
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // 刷新页面以更新共享状态
+                } else {
+                    alert(data.message);
                 }
-            }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
-            function shareQuestionSet(groupId) {
-                const form = document.getElementById('share-question-set-form');
-                const formData = new FormData(form);
+    document.addEventListener('DOMContentLoaded', function () {
+        const joinGroupBtn = document.getElementById('joinGroupBtn');
+        const leaveGroupBtn = document.getElementById('leaveGroupBtn');
 
-                fetch(`/groups/share_question_set/${groupId}/`, {
+        if (joinGroupBtn) {
+            joinGroupBtn.addEventListener('click', () => handleGroupAction('join'));
+        }
+
+        if (leaveGroupBtn) {
+            leaveGroupBtn.addEventListener('click', () => handleGroupAction('leave'));
+        }
+
+        function handleGroupAction(action) {
+            const groupId = {{ group.id }};
+            const url = action === 'join' ? `/groups/join_group/${groupId}/` : `/groups/leave_group/${groupId}/`;
+            const confirmMessage = action === 'join' ? "您确定要加入这个组吗？" : "您确定要退出这个组吗？";
+
+            if (confirm(confirmMessage)) {
+                fetch(url, {
                     method: 'POST',
-                    body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRFToken': '{{ csrf_token }}'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        location.reload(); // 刷新页面以更新共享状态
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.href = data.redirect_url; // 跳转到组管理页面
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             }
-        });
+        }
+    });
     </script>
 {% endblock %}

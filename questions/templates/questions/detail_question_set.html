@@ -4,6 +4,7 @@
 {% block content %}
     <div class="max-w-6xl mx-auto mt-10 px-4">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">{{ question_set.name }}</h1>
+        <p class="text-center text-gray-600 mb-8">题单创建者：{{ question_set.creator }}</p>
         <p class="text-center text-gray-600 mb-8">{{ question_set.description }}</p>
 
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
