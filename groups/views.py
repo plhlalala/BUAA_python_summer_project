@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,9 @@ from django.shortcuts import render
 
 @login_required
 def group_management(request):
-    user_groups = request.user.joined_groups.all()
+    user = request.user
+    user_groups = user.joined_groups.all()
+
     search_query = request.GET.get('search', '')
     search_results = []
     search_performed = False
@@ -22,12 +25,15 @@ def group_management(request):
         search_results = Group.objects.filter(name__icontains=search_query)
         search_performed = True
 
-    context = {
+    # 获取热门组（人数最多的5个小组）
+    popular_groups = Group.objects.annotate(member_count=Count('members')).order_by('-member_count')[:5]
+
+    return render(request, 'groups/management_group.html', {
         'user_groups': user_groups,
         'search_results': search_results,
         'search_performed': search_performed,
-    }
-    return render(request, 'groups/management_group.html', context)
+        'popular_groups': popular_groups
+    })
 
 
 @login_required

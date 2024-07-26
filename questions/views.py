@@ -3,7 +3,7 @@ import json
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncDate
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 
 from groups.models import Group
 from . import models
@@ -123,6 +123,21 @@ def share_question(request, question_id):
 @login_required
 def question_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
+    user = request.user
+
+    # 获取用户所在的组的 ID 列表
+    user_group_ids = list(user.groups.values_list('id', flat=True))
+
+    # 检查用户是否有权限访问
+    has_access = (
+            question.creator == user or
+            QuestionSet.objects.filter(questions=question, is_public=True).exists() or
+            QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
+    )
+    if not has_access:
+        return HttpResponseForbidden("You do not have permission to view this question.")
+    if not (request.user in question.question_sets.values_list('creator', flat=True)):
+        return HttpResponseForbidden("You do not have permission to view this question.")
     return render(request, 'questions/detail_question.html', {'question': question})
 
 
@@ -144,6 +159,16 @@ def create_question_set(request):
 @login_required
 def question_set_detail(request, question_set_id):
     question_set = get_object_or_404(QuestionSet, id=question_set_id)
+    user = request.user
+    # 检查用户是否有权限访问
+    user_groups = user.groups.all()
+    has_access = (
+            question_set.creator == user or
+            question_set.is_public or
+            question_set.shared_with_groups.filter(id__in=user_groups).exists()
+    )
+    if not has_access:
+        return HttpResponseForbidden("You do not have permission to view this question set.")
 
     search_results = []
     search_form = QuestionSearchForm(request.GET or None)
@@ -187,6 +212,16 @@ def remove_question_from_set(request, question_set_id, question_id):
 @login_required
 def practice_question_set(request, question_set_id):
     question_set = get_object_or_404(QuestionSet, id=question_set_id)
+    user = request.user
+    # 检查用户是否有权限访问
+    user_groups = user.groups.all()
+    has_access = (
+            question_set.creator == user or
+            question_set.is_public or
+            question_set.shared_with_groups.filter(id__in=user_groups).exists()
+    )
+    if not has_access:
+        return HttpResponseForbidden("You do not have permission to view this question set.")
     questions = question_set.questions.all()
     questions_data = [
         {

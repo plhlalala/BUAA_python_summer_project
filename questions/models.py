@@ -40,7 +40,6 @@ class Question(models.Model):
     correct_answer = models.TextField(blank=True)
     correct_answer_image = models.ImageField(upload_to='questions/', blank=True, null=True)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    shared_with = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='shared_questions', blank=True)
     subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
 
     def __str__(self):
