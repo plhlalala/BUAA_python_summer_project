@@ -1,3 +1,11 @@
+# TODOLIST
+
+* 借助django自带的后台管理系统，实现用户和管理员的信息管理。
+* 对上传题目是否含有敏感词进行检测，若有则删除。
+* 在题目详情页添加评论功能。
+* 待补充
+
+
 # BUAA_python_summer_project 使用指南
 
 欢迎使用 BUAA_python_summer_project，本项目是一个基于 Python 和 Django 的 Web 应用。以下是如何在本地运行项目的步骤。
