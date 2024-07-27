@@ -63,6 +63,15 @@ python manage.py runserver
 
 在浏览器中访问 `http://127.0.0.1:8000/` 来查看应用。
 
+### 访问管理员页面
+
+在启动 Django 开发服务器后，可以通过以下 URL 访问管理员页面:`http://127.0.0.1:8000/admin/`
+
+使用在创建超级管理员时设置的用户名和密码进行登录。如果还没有创建超级管理员，可以使用以下命令创建：
+
+```bash
+python manage.py createsuperuser
+```
 ## 使用说明
 
 - OCR 功能需要将相关路径配置为本地路径。请根据您的环境修改 `questions/views.py` 中 `ocr_image`中`pytesseract.pytesseract.tesseract_cmd` 中的相关配置。
