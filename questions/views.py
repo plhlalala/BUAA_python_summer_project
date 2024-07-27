@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncDate
@@ -18,6 +19,7 @@ from django.db.models import Count, Avg, Q
 from django.utils import timezone
 import datetime
 from .models import SUBJECT_CHOICES
+from sensitive_word_filter import DFAFilter
 
 
 @login_required
@@ -48,15 +50,34 @@ def create_question(request):
             form = QuestionPictureForm(request.POST, request.FILES)
         else:
             form = QuestionForm(request.POST, request.FILES)
+
         if form.is_valid():
             question = form.save(commit=False)
             question.creator = request.user
+            # 使用 DFAFilter 过滤问题描述和正确答案
+            dfa_filter = DFAFilter()
+            filtered_description, has_sensitive_word_desc = dfa_filter.filter(question.description)
+            filtered_correct_answer, has_sensitive_word_ans = dfa_filter.filter(question.correct_answer)
+
+            if has_sensitive_word_desc or has_sensitive_word_ans:
+                return render(request, 'questions/create_question.html', {
+                    'form': form,
+                    'SUBJECT_CHOICES': models.SUBJECT_CHOICES,
+                    'error_message': '问题描述或答案中包含敏感词，请修改后再提交。'
+                })
+
+            question.description = filtered_description
+            question.correct_answer = filtered_correct_answer
             question.save()
             form.save_m2m()
             return redirect('question_detail', question_id=question.id)
     else:
         form = QuestionForm()
-    return render(request, 'questions/create_question.html', {'form': form, 'SUBJECT_CHOICES': models.SUBJECT_CHOICES})
+
+    return render(request, 'questions/create_question.html', {
+        'form': form,
+        'SUBJECT_CHOICES': models.SUBJECT_CHOICES
+    })
 
 
 @login_required
@@ -134,10 +155,10 @@ def question_detail(request, question_id):
             QuestionSet.objects.filter(questions=question, is_public=True).exists() or
             QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
     )
+
     if not has_access:
         return HttpResponseForbidden("You do not have permission to view this question.")
-    if not (request.user in question.question_sets.values_list('creator', flat=True)):
-        return HttpResponseForbidden("You do not have permission to view this question.")
+
     return render(request, 'questions/detail_question.html', {'question': question})
 
 

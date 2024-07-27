@@ -6,6 +6,11 @@
     <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">创建问题</h1>
 
     <div class="bg-white shadow-md rounded-lg p-6">
+        {% if error_message %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ error_message }}</span>
+            </div>
+        {% endif %}
         <form method="post" enctype="multipart/form-data" id="questionForm">
             {% csrf_token %}
             <div class="mb-4">
@@ -107,32 +112,31 @@
     toggleOCROptions();
 
     document.getElementById('questionForm').onsubmit = function() {
-    const format = document.getElementById('format').value;
-    let isValid = true;
-    let errorMessage = '';
+        const format = document.getElementById('format').value;
+        let isValid = true;
+        let errorMessage = '';
 
-    if (format === 'text') {
-        const description = document.getElementById('description').value.trim();
-        const correctAnswer = document.getElementById('correct_answer').value.trim();
-        if (!description || !correctAnswer) {
-            isValid = false;
-            errorMessage = '请填写题目描述和参考答案。';
+        if (format === 'text') {
+            const description = document.getElementById('description').value.trim();
+            const correctAnswer = document.getElementById('correct_answer').value.trim();
+            if (!description || !correctAnswer) {
+                isValid = false;
+                errorMessage = '请填写题目描述和参考答案。';
+            }
+        } else if (format === 'image') {
+            const descriptionImage = document.getElementById('image_description').files.length;
+            const correctAnswerImage = document.getElementById('image_answer').files.length;
+            if (!descriptionImage || !correctAnswerImage) {
+                isValid = false;
+                errorMessage = '请上传题目描述图片和参考答案图片。';
+            }
         }
-    } else if (format === 'image') {
-        const descriptionImage = document.getElementById('image_description').files.length;
-        const correctAnswerImage = document.getElementById('image_answer').files.length;
-        if (!descriptionImage || !correctAnswerImage) {
-            isValid = false;
-            errorMessage = '请上传题目描述图片和参考答案图片。';
+
+        if (!isValid) {
+            alert(errorMessage);
         }
-    }
-
-    if (!isValid) {
-        alert(errorMessage);
-    }
-    return isValid;
-};
-
+        return isValid;
+    };
 </script>
 
 {% endblock %}
