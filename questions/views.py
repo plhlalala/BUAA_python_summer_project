@@ -286,19 +286,25 @@ def check_answer(request, question_id):
 def question_set_list(request):
     user = request.user
     search_query = request.GET.get('search', '')
+
     # 获取用户所在的小组的 ID 列表
     group_ids = list(user.groups.values_list('id', flat=True))
-    # 合并三个查询集并去重
-    # 使用Q对象和distinct()确保去重
+
+    # 获取用户可访问的题单
     accessible_question_sets = QuestionSet.objects.filter(
         Q(creator=user) |
         Q(shared_with_groups__in=group_ids) |
         Q(is_public=True)
     ).distinct()
 
+    # 获取用户可访问的题目
+    accessible_questions = Question.objects.filter(
+        Q(creator=user) |
+        Q(question_sets__in=accessible_question_sets)
+    ).distinct()
+
     if search_query:
-        questions = Question.objects.filter(title__icontains=search_query,
-                                            question_sets__in=accessible_question_sets).distinct()
+        questions = accessible_questions.filter(title__icontains=search_query).distinct()
         search_performed = True
     else:
         questions = []
