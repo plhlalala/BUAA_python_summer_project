@@ -11,7 +11,6 @@ urlpatterns = [
     path('questions/', include('questions.urls')),
     path('groups/', include('groups.urls')),
     path('admin/', custom_admin_site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('', core_views.home, name='home'),
 ]
 
