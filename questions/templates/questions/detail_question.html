@@ -3,8 +3,11 @@
 {% block title %}问题详情{% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/github-markdown.min.css' %}">
-    <script src="{% static 'js/markdown-it.min.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@12.0.6/dist/markdown-it.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -48,7 +51,6 @@
                 </button>
             </form>
 
-
             <h3 class="text-xl font-semibold text-gray-700 mb-4">已有评论</h3>
             <ul class="space-y-4">
                 {% for comment in comments %}
@@ -72,11 +74,16 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            console.log(typeof markdownit); // 应该返回 "function"
             if (typeof markdownit !== 'undefined') {
                 const md = window.markdownit();
                 document.querySelectorAll('.markdown-body').forEach(el => {
                     el.innerHTML = md.render(el.innerText);
+                    renderMathInElement(el, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false}
+                        ]
+                    });
                 });
             } else {
                 console.error("Markdown-it库未加载");
