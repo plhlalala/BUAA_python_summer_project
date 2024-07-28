@@ -160,12 +160,15 @@ def question_detail(request, question_id):
 
     comments = question.comments.all()
     if request.method == 'POST':
+        print(1)
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.author = request.user
             comment.question = question
             comment.save()
+            print(comment.text)
+            print(1)
             return redirect('question_detail', question_id=question.id)
     else:
         form = CommentForm()
