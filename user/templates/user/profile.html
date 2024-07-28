@@ -1,7 +1,7 @@
 {% extends 'basehome.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}个人信息{% endblock %}
+
 {% block content %}
 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
   <div class="px-4 py-5 sm:px-6">
@@ -25,35 +25,35 @@
           <div class="grid grid-cols-6 gap-6">
             <div class="col-span-6 sm:col-span-3">
               <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">用户名</label>
-              {{ form.username|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" }}
+              {{ form.username|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" }}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">电子邮箱</label>
-              {{ form.email|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" }}
+              {{ form.email|add_class:"mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" }}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="first_name" class="block text-sm font-medium text-gray-700">名字</label>
-              {% render_field form.first_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
+              {% render_field form.first_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="last_name" class="block text-sm font-medium text-gray-700">姓氏</label>
-              {% render_field form.last_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
+              {% render_field form.last_name class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" %}
             </div>
             <div class="col-span-6">
               <label for="bio" class="block text-sm font-medium text-gray-700">个人简介</label>
-              {% render_field form.bio class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
+              {% render_field form.bio class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="date_of_birth" class="block text-sm font-medium text-gray-700">出生日期</label>
-              {% render_field form.date_of_birth class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" type="date" %}
+              {% render_field form.date_of_birth class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" type="date" %}
             </div>
             <div class="col-span-6 sm:col-span-3">
               <label for="location" class="block text-sm font-medium text-gray-700">所在地</label>
-              {% render_field form.location class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
+              {% render_field form.location class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" %}
             </div>
             <div class="col-span-6">
               <label for="education" class="block text-sm font-medium text-gray-700">教育背景</label>
-              {% render_field form.education class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50 w-full" %}
+              {% render_field form.education class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md bg-gray-50" %}
             </div>
           </div>
         </div>
@@ -66,8 +66,4 @@
     </form>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script src="{% static 'js/user_profile.js' %}"></script>
 {% endblock %}
