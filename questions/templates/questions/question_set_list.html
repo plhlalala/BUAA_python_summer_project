@@ -2,7 +2,6 @@
 {% block title %}题单列表{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto mt-10 px-4">
     <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">题目搜索</h1>
 
     <!-- 搜索框 -->
@@ -23,7 +22,8 @@
             {% if questions %}
                 {% for question in questions %}
                     <div class="bg-white shadow-lg rounded-lg p-4 mb-2">
-                        <a href="{% url 'question_detail' question.id %}" class="text-blue-500 hover:text-blue-700 text-lg font-semibold">
+                        <a href="{% url 'question_detail' question.id %}"
+                           class="text-blue-500 hover:text-blue-700 text-lg font-semibold">
                             {{ question.title }}
                         </a>
                     </div>
@@ -32,27 +32,100 @@
                 <p class="text-red-500">没有找到匹配的题目。</p>
             {% endif %}
         </div>
+
+        <!-- 分页控件 -->
+        <div class="mt-4">
+            <span class="block text-sm text-gray-700">
+                第 {{ questions.number }} 页，共 {{ questions.paginator.num_pages }} 页
+            </span>
+            <div class="flex justify-center mt-2">
+                {% if questions.has_previous %}
+                    <a href="?search={{ search_query }}&page={{ questions.previous_page_number }}"
+                       class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        上一页
+                    </a>
+                {% endif %}
+                {% for num in questions.paginator.page_range %}
+                    {% if num > questions.number|add:'-3' and num < questions.number|add:'3' %}
+                        {% if questions.number == num %}
+                            <span class="px-3 py-2 bg-gray-300 rounded-lg">{{ num }}</span>
+                        {% else %}
+                            <a href="?search={{ search_query }}&page={{ num }}"
+                               class="px-3 py-2 ml-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">{{ num }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if questions.has_next %}
+                    <a href="?search={{ search_query }}&page={{ questions.next_page_number }}"
+                       class="px-3 py-2 ml-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        下一页
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     {% endif %}
-<div class="max-w-6xl mx-auto mt-10 px-4">
-    <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">题单列表</h1>
+
+    <br>
+    <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">题单搜索</h1>
+
+    <!-- 搜索题单框 -->
+    <form method="GET" action="{% url 'question_set_list' %}" class="mb-4">
+        <div class="flex justify-center">
+            <input type="text" name="set_search" placeholder="搜索题单"
+                   value="{{ set_search_query }}" class="flex-grow border rounded-l px-4 py-2">
+            <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">搜索
+            </button>
+        </div>
+    </form>
+
+    <!-- 显示题单搜索结果 -->
+    {% if set_search_performed %}
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">题单搜索结果</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {% if filtered_question_sets %}
+                {% for question_set in filtered_question_sets %}
+                    <div class="bg-white shadow-lg rounded-lg p-6">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ question_set.name }}</h2>
+                        <p class="text-gray-700 mb-4">{{ question_set.description }}</p>
+                        <div class="flex justify-between">
+                            <a href="{% url 'question_set_detail' question_set.id %}"
+                               class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                                查看详情
+                            </a>
+                            <a href="{% url 'practice_question_set' question_set.id %}"
+                               class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                                练习题单
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-red-500">没有找到匹配的题单。</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    <h1 class="text-4xl font-bold text-center text-gray-900 mb-12">所有题单</h1>
     <!-- 题单列表 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {% for question_set in question_sets %}
-        <div class="bg-white shadow-lg rounded-lg p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ question_set.name }}</h2>
-            <p class="text-gray-700 mb-4">{{ question_set.description }}</p>
-            <div class="flex justify-between">
-                <a href="{% url 'question_set_detail' question_set.id %}"
-                   class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
-                    查看详情
-                </a>
-                <a href="{% url 'practice_question_set' question_set.id %}"
-                   class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
-                    练习题单
-                </a>
+            <div class="bg-white shadow-lg rounded-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ question_set.name }}</h2>
+                <p class="text-gray-700 mb-4">{{ question_set.description }}</p>
+                <div class="flex justify-between">
+                    <a href="{% url 'question_set_detail' question_set.id %}"
+                       class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                        查看详情
+                    </a>
+                    <a href="{% url 'practice_question_set' question_set.id %}"
+                       class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                        练习题单
+                    </a>
+                </div>
             </div>
-        </div>
         {% endfor %}
     </div>
-</div>
+    </div>
 {% endblock %}

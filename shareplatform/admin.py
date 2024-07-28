@@ -2,7 +2,7 @@
 
 from django.contrib.admin import AdminSite
 from django.contrib import admin
-from questions.models import Question, QuestionSet, UserAnswer
+from questions.models import Question, QuestionSet, UserAnswer, Comment
 from groups.models import Group
 from user.models import User
 
@@ -36,6 +36,12 @@ class UserAnswerAdmin(admin.ModelAdmin):
     list_display = ('user', 'question', 'is_correct', 'timestamp')
     list_filter = ('is_correct', 'timestamp')
     search_fields = ('user__username', 'question__title', 'wrong_answer_reason')
+
+
+@admin.register(Comment, site=custom_admin_site)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('question', 'author', 'created_at')
+    search_fields = ('question__title', 'author__username')
 
 
 @admin.register(Group, site=custom_admin_site)

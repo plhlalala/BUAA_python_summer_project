@@ -151,9 +151,9 @@ def question_detail(request, question_id):
 
     # 检查用户是否有权限访问
     has_access = (
-            question.creator == user or
-            QuestionSet.objects.filter(questions=question, is_public=True).exists() or
-            QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
+        question.creator == user or
+        QuestionSet.objects.filter(questions=question, is_public=True).exists() or
+        QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
     )
     if not has_access:
         return HttpResponseForbidden("You do not have permission to view this question.")
@@ -297,10 +297,13 @@ def check_answer(request, question_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
 
 
+from django.core.paginator import Paginator
+
 @login_required
 def question_set_list(request):
     user = request.user
     search_query = request.GET.get('search', '')
+    set_search_query = request.GET.get('set_search', '')
 
     # 获取用户所在的小组的 ID 列表
     group_ids = list(user.groups.values_list('id', flat=True))
@@ -325,12 +328,28 @@ def question_set_list(request):
         questions = []
         search_performed = False
 
+    if set_search_query:
+        filtered_question_sets = accessible_question_sets.filter(name__icontains=set_search_query).distinct()
+        set_search_performed = True
+    else:
+        filtered_question_sets = accessible_question_sets
+        set_search_performed = False
+
+    # 分页处理
+    paginator = Paginator(questions, 5)  # 每页显示5个题目
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'questions/question_set_list.html', {
         'question_sets': accessible_question_sets,
-        'questions': questions,
+        'filtered_question_sets': filtered_question_sets,
+        'questions': page_obj,  # 传递分页对象到模板
         'search_performed': search_performed,
-        'search_query': search_query
+        'set_search_performed': set_search_performed,
+        'search_query': search_query,
+        'set_search_query': set_search_query
     })
+
 
 
 @login_required

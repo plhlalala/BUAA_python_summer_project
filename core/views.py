@@ -17,7 +17,8 @@ def home(request):
     average_time_per_question = 5  # 分钟
     study_duration_minutes = completed_questions * average_time_per_question
     study_duration = str(timedelta(minutes=study_duration_minutes))
-
+    study_duration = study_duration.split(':')
+    study_duration = f'{study_duration[0]}时{study_duration[1]}分'
     # 计算技能提升百分比
     total_questions = UserAnswer.objects.filter(user=user).count()
     correct_answers = UserAnswer.objects.filter(user=user, is_correct=True).count()
