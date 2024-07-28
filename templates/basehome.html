@@ -5,10 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学习平台 - 主页</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <title>{% block title %}默认标题{% endblock %}</title>
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
     <script src="{% static 'js/user_profile.js' %}"></script>
     <link rel="icon" href="{% static 'ico.png' %}" type="image/x-icon">
+    {% block extrahead %}{% endblock %}
     {% csrf_token %}
 </head>
 <body class="bg-gray-100">

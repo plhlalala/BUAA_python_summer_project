@@ -9,7 +9,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from groups.models import Group
 from . import models
 from .models import Question, QuestionSet, UserAnswer
-from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm
+from .forms import QuestionForm, QuestionSetForm, QuestionSearchForm, QuestionPictureForm, CommentForm
 import pytesseract
 from PIL import Image, ImageEnhance
 from django.shortcuts import render
@@ -155,11 +155,26 @@ def question_detail(request, question_id):
             QuestionSet.objects.filter(questions=question, is_public=True).exists() or
             QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
     )
-
     if not has_access:
         return HttpResponseForbidden("You do not have permission to view this question.")
 
-    return render(request, 'questions/detail_question.html', {'question': question})
+    comments = question.comments.all()
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.question = question
+            comment.save()
+            return redirect('question_detail', question_id=question.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'questions/detail_question.html', {
+        'question': question,
+        'comments': comments,
+        'comment_form': form,
+    })
 
 
 @login_required

@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 from groups.models import Group
 
@@ -64,3 +66,13 @@ class UserAnswer(models.Model):
     wrong_answer_reason = models.TextField(blank=True)
     is_correct = models.BooleanField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class Comment(models.Model):
+    question = models.ForeignKey(Question, related_name='comments', on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = MarkdownxField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.text[:20]

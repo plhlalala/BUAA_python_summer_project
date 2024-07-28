@@ -1,54 +1,45 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('profile-form');
-    const avatarInput = document.getElementById('id_avatar');
-    const avatarPreview = document.getElementById('avatar-preview');
+    function init() {
+        const form = document.getElementById('profile-form');
+        if (form) {
+            form.removeEventListener('submit', handleFormSubmit);
+            form.addEventListener('submit', handleFormSubmit);
+            console.log('Event listener re-bound to form submit.');
+        }
+    }
 
-    // 检查是否已经绑定事件，避免重复绑定
-    if (avatarInput && !avatarInput.dataset.listenerAdded) {
-        avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    avatarPreview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+    // 调用 init 来绑定事件
+    init();
+
+    // 如果页面有AJAX加载或其他动态内容变化导致表单被重新创建或修改，确保重新调用 init
+    // 例如，可以在AJAX回调或动态内容加载的回调函数中调用 init()
+});
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    console.log('Attempting to submit form.');
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         });
-        avatarInput.dataset.listenerAdded = true;
+        const data = await response.json();
+        console.log('Response received:', data);
+        if (data.success) {
+            alert('个人信息更新成功！');
+        } else {
+            alert('更新个人信息时发生错误。请重试。');
+            console.error('Form errors:', data.errors);
+        }
+    } catch (error) {
+        console.error('Error during form submission:', error);
+        alert('发生错误。请重试。');
     }
-
-    // 检查是否已经绑定事件，避免重复绑定
-    if (form && !form.dataset.listenerAdded) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (!form.dataset.alertShown) {
-                        alert('个人信息更新成功！');
-                        form.dataset.alertShown = true;
-                    }
-                } else {
-                    alert('更新个人信息时发生错误。请重试。');
-                    console.error(data.errors);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('发生错误。请重试。');
-            });
-        });
-        form.dataset.listenerAdded = true;
-    }
-});
+}

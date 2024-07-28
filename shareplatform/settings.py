@@ -41,6 +41,13 @@ INSTALLED_APPS = [
     'groups.apps.GroupsConfig',
     'questions.apps.QuestionsConfig',
     'widget_tweaks',
+    'markdownx',
+]
+
+MARKDOWNX_MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.extra',
+    'markdown.extensions.codehilite',
+    'markdown.extensions.toc',
 ]
 
 AUTH_USER_MODEL = 'user.User'

@@ -1,10 +1,3 @@
-# TODOLIST
-
-* 借助django自带的后台管理系统，实现用户和管理员的信息管理。
-* 对上传题目是否含有敏感词进行检测，若有则删除。
-* 在题目详情页添加评论功能。
-* 待补充
-
  
 # BUAA_python_summer_project 使用指南
 
@@ -28,20 +21,15 @@ cd BUAA_python_summer_project
 ```
 
 ### 创建并激活 Conda 环境
-
-使用 `environment.yml` 文件创建 Conda 环境，并激活该环境：
-
-```bash
-conda env create -f environment.yml
-conda activate se
 ```
+# 激活 conda 环境
+conda activate se
 
-### 安装依赖
+# 安装 conda 依赖
+conda install --file requirements-conda.txt
 
-在激活的 Conda 环境中，安装通过 pip 管理的依赖：
-
-```bash
-pip install -r requirements.txt
+# 安装 pip 依赖
+pip install -r requirements-pip.txt
 ```
 
 ### 数据库迁移

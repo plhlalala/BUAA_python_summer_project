@@ -1,5 +1,7 @@
 from django import forms
-from .models import Question, QuestionSet
+from markdownx.fields import MarkdownxFormField
+
+from .models import Question, QuestionSet, Comment
 
 
 class QuestionForm(forms.ModelForm):
@@ -22,6 +24,14 @@ class QuestionPictureForm(forms.ModelForm):
         self.fields['image'].required = False
         self.fields['description_image'].required = False
         self.fields['correct_answer_image'].required = False
+
+
+class CommentForm(forms.ModelForm):
+    text = MarkdownxFormField()
+
+    class Meta:
+        model = Comment
+        fields = ['text']
 
 
 class QuestionSetForm(forms.ModelForm):
