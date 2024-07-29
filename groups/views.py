@@ -53,13 +53,6 @@ def create_group(request):
 
 
 @login_required
-def group_list(request):
-    user_groups = request.user.joined_groups.all()
-    available_groups = Group.objects.exclude(members=request.user)
-    return render(request, 'groups/group_list.html', {'user_groups': user_groups, 'available_groups': available_groups})
-
-
-@login_required
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
     all_question_sets = QuestionSet.objects.filter(creator=request.user)

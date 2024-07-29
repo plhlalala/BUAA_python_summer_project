@@ -3,7 +3,8 @@
 {% block title %}问题详情{% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@12.0.6/dist/markdown-it.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
@@ -43,7 +44,7 @@
                     <label for="id_comment" class="block text-gray-700 text-sm font-bold mb-2">评论</label>
                     <textarea id="id_comment" name="text"
                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
-                              rows="10" placeholder="支持Markdown渲染"></textarea>
+                              rows="10" placeholder="支持Markdown和数学公式的渲染"></textarea>
                 </div>
                 <button type="submit"
                         class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full">
