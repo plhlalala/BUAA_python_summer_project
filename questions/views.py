@@ -147,13 +147,13 @@ def question_detail(request, question_id):
     user = request.user
 
     # 获取用户所在的组的 ID 列表
-    user_group_ids = list(user.groups.values_list('id', flat=True))
+    user_group_ids = list(user.joined_groups.values_list('id', flat=True))
 
     # 检查用户是否有权限访问
     has_access = (
-        question.creator == user or
-        QuestionSet.objects.filter(questions=question, is_public=True).exists() or
-        QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
+            question.creator == user or
+            QuestionSet.objects.filter(questions=question, is_public=True).exists() or
+            QuestionSet.objects.filter(questions=question, shared_with_groups__id__in=user_group_ids).exists()
     )
     if not has_access:
         return HttpResponseForbidden("You do not have permission to view this question.")
@@ -197,7 +197,7 @@ def question_set_detail(request, question_set_id):
     question_set = get_object_or_404(QuestionSet, id=question_set_id)
     user = request.user
     # 检查用户是否有权限访问
-    user_groups = user.groups.all()
+    user_groups = user.joined_groups.all()
     has_access = (
             question_set.creator == user or
             question_set.is_public or
@@ -250,7 +250,7 @@ def practice_question_set(request, question_set_id):
     question_set = get_object_or_404(QuestionSet, id=question_set_id)
     user = request.user
     # 检查用户是否有权限访问
-    user_groups = user.groups.all()
+    user_groups = user.joined_groups.all()
     has_access = (
             question_set.creator == user or
             question_set.is_public or
@@ -299,6 +299,7 @@ def check_answer(request, question_id):
 
 from django.core.paginator import Paginator
 
+
 @login_required
 def question_set_list(request):
     user = request.user
@@ -306,7 +307,7 @@ def question_set_list(request):
     set_search_query = request.GET.get('set_search', '')
 
     # 获取用户所在的小组的 ID 列表
-    group_ids = list(user.groups.values_list('id', flat=True))
+    group_ids = list(user.joined_groups.values_list('id', flat=True))
 
     # 获取用户可访问的题单
     accessible_question_sets = QuestionSet.objects.filter(
@@ -349,7 +350,6 @@ def question_set_list(request):
         'search_query': search_query,
         'set_search_query': set_search_query
     })
-
 
 
 @login_required
