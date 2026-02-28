@@ -1,90 +1,156 @@
- 
-# BUAA_python_summer_project 使用指南
+# 知习云 — BUAA 共享练习平台
 
-欢迎使用 BUAA_python_summer_project，本项目是一个基于 Python 和 Django 的 Web 应用。以下是如何在本地运行项目的步骤。
+> 一个基于 Python/Django 构建的题目共享与自测平台，支持用户注册登录、题目上传（OCR识别）、题组管理、小组协作、错题推荐及学习统计可视化等功能。
+
+## 功能特性
+
+- **用户管理**：注册、登录、个人资料管理（头像、简介等）
+- **题目管理**：创建、编辑、删除题目，支持文本和图片两种格式
+- **OCR 识别**：通过上传图片自动识别文本，快速录入题目内容
+- **题组管理**：将题目整理为题单，支持分科目分类
+- **题组共享**：将题单分享给指定小组或公开发布
+- **用户小组**：创建和加入学习小组，成员可共享题单
+- **题目搜索**：搜索公开或小组内共享的题目和题单
+- **错题回顾**：根据错误频率和科目智能推荐复习题目
+- **学习统计**：可视化展示每日做题量、正确率及科目分布
+- **敏感词过滤**：基于 DFA 算法自动过滤题目中的敏感词
+- **管理后台**：自定义 Django 管理界面
+
+## 技术栈
+
+- **后端**：Python 3.8+、Django 4.2
+- **前端**：Tailwind CSS、原生 JavaScript
+- **数据库**：SQLite（开发）/ MySQL（生产可选）
+- **OCR**：Tesseract + pytesseract + Pillow
+- **机器学习**：scikit-learn、scipy、numpy（用于错题推荐算法）
+- **其他**：django-markdownx（Markdown 支持）、django-widget-tweaks
 
 ## 环境要求
 
 - Python 3.8 或更高版本
-- pip (Python 包管理器)
-- Conda 环境管理器
+- pip（Python 包管理器）
+- Tesseract OCR 引擎（用于图片文字识别）
+- （可选）Conda 环境管理器
 
 ## 安装步骤
 
-### 克隆仓库到本地
-
-打开终端（命令提示符、Powershell 或 Bash），并运行以下命令：
+### 1. 克隆仓库到本地
 
 ```bash
-git clone https://github.com/您的GitHub用户名/BUAA_python_summer_project.git
+git clone https://github.com/plhlalala/BUAA_python_summer_project.git
 cd BUAA_python_summer_project
 ```
 
-### 创建并激活 Conda 环境
+### 2. 创建并激活虚拟环境
+
+**使用 pip + venv：**
+
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS / Linux
+source venv/bin/activate
 ```
-# 激活 conda 环境
+
+**或使用 Conda：**
+
+```bash
+conda create --name se python=3.8
 conda activate se
+```
 
-# 安装 conda 依赖
-conda install --file requirements-conda.txt
+### 3. 安装依赖
 
-# 安装 pip 依赖
+**使用 pip（推荐）：**
+
+```bash
 pip install -r requirements-pip.txt
 ```
 
-### 数据库迁移
+**使用 Conda + pip（Windows 平台）：**
 
-执行以下命令，以应用数据库迁移：
+```bash
+conda install --file requirements-conda.txt
+pip install django-markdownx==4.0.7 django-widget-tweaks==1.4.5
+```
+
+### 4. 安装 Tesseract OCR
+
+OCR 功能依赖 Tesseract 引擎，请根据操作系统安装：
+
+- **Ubuntu/Debian**：
+  ```bash
+  sudo apt-get install tesseract-ocr tesseract-ocr-chi-sim
+  ```
+- **macOS**：
+  ```bash
+  brew install tesseract tesseract-lang
+  ```
+- **Windows**：从 [Tesseract 官方页面](https://github.com/UB-Mannheim/tesseract/wiki) 下载安装包，并将安装路径添加到系统 PATH，或在 `questions/views.py` 中 `ocr_image` 函数里指定实际安装路径（常见路径示例）：
+  ```python
+  # 64 位系统（常见）
+  pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+  # 32 位系统
+  # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
+  ```
+
+### 5. 数据库迁移
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 运行开发服务器
+### 6. 创建超级管理员（可选）
 
-使用以下命令启动 Django 开发服务器：
+```bash
+python manage.py createsuperuser
+```
+
+### 7. 运行开发服务器
 
 ```bash
 python manage.py runserver
 ```
 
-在浏览器中访问 `http://127.0.0.1:8000/` 来查看应用。
+在浏览器中访问 `http://127.0.0.1:8000/` 即可使用平台。
 
-### 访问管理员页面
+管理员后台地址：`http://127.0.0.1:8000/admin/`
 
-在启动 Django 开发服务器后，可以通过以下 URL 访问管理员页面:`http://127.0.0.1:8000/admin/`
+## 项目结构
 
-使用在创建超级管理员时设置的用户名和密码进行登录。如果还没有创建超级管理员，可以使用以下命令创建：
-
-```bash
-python manage.py createsuperuser
 ```
+BUAA_python_summer_project/
+├── core/                   # 首页视图和学习能力模型
+├── groups/                 # 用户小组管理
+├── questions/              # 题目、题组、答题记录管理
+├── user/                   # 用户注册、登录、个人资料
+├── shareplatform/          # Django 项目配置（settings、urls等）
+├── templates/              # 全局 HTML 模板
+├── static/                 # 静态文件（CSS、JS、图片）
+├── media/                  # 用户上传的媒体文件
+├── sensitive_word_filter.py  # 基于 DFA 的敏感词过滤器
+├── sensitive_words_lines.txt # 敏感词列表
+├── requirements-pip.txt    # pip 依赖列表
+├── requirements-conda.txt  # Conda 依赖列表
+└── manage.py
+```
+
 ## 使用说明
 
-- OCR 功能需要将相关路径配置为本地路径。请根据您的环境修改 `questions/views.py` 中 `ocr_image`中`pytesseract.pytesseract.tesseract_cmd` 中的相关配置。
+1. **注册/登录**：访问 `/user/register/` 注册账号，然后登录。
+2. **创建题目**：登录后进入题目管理页面，可手动输入或通过上传图片 OCR 识别录入题目。
+3. **整理题单**：将题目添加到题单中，便于分类管理和练习。
+4. **加入小组**：在小组页面搜索并加入感兴趣的学习小组，或创建自己的小组。
+5. **共享题单**：将题单分享给小组成员或设置为公开，供他人练习。
+6. **练习题目**：在题单详情页开始练习，系统会记录答题情况。
+7. **查看统计**：在统计页面查看答题数据和学习曲线。
+8. **错题复习**：在错题页面根据科目和数量获取智能推荐复习题目。
 
+## 配置说明
 
-## 附：
-<h1 style="text-align: center;">Shared Exercise Platform</h1>
- 
-设计一个平台，学生可以在上面上传和分享问题，并且可以进行自测。
-
-* 基本要求
-  1. 使用GUI库如Tkinter、PyQt5，或其他Python支持的前端和后端框架。
-  2. 问题应包括多种格式，如选择题和填空题。问题需自行获取。
-  3. 界面应美观但不过于花哨，以免影响解题。可以添加其他功能，但应用户友好且易于使用。
-
-* 必须完成的任务
-  1. 基本要求：用户和管理员注册、登录及个人信息管理。
-  2. 用户组：用户可以选择创建和加入组，用户可以自行搜索并加入组。
-  3. 上传：自动识别PDF或图片中的文本。识别后，提取的文本结果可以编辑以完成问题输入。（提示：使用OCR）
-  4. 问题分组：设计自己的或利用现有的数据结构，将问题按章节或其他标准分类。解题时，用户可以选择特定的题组。解题界面应根据个人喜好设计，无需过多要求。
-  5. 问题分享：用户可以选择将题组分享给特定组或公开分享。共享的接收者可以访问共享的题组。
-  6. 搜索组：搜索应具有可定制的参数，但搜索范围应包括共享的题组和用户上传的问题，不应搜索未共享的题组。
-  7. 错题日志：根据用户的错误回答、错误频率以及用户指定的科目和题量，参考相关推荐算法生成一组用户应优先重新解决的问题集，使用科学有效的算法。
-
-* 可选任务
-  1. 系统具有筛选敏感词并删除题库中敏感词的功能。找到实现该功能的方法。
-  2. 可视化学生能力。根据错误答案的类型和时间，参考相关资料定义学生错误问题信息到学生能力信息的转换标准。绘制显示学生能力随时间变化的图表。
-  3. 实现额外功能，根据实用性和工作量给予加分。
+- **密钥安全**：生产环境部署前，请将 `shareplatform/settings.py` 中的 `SECRET_KEY` 替换为随机生成的密钥，并将 `DEBUG` 设置为 `False`。
+- **允许的主机**：在 `settings.py` 的 `ALLOWED_HOSTS` 中添加您的服务器域名或 IP 地址。
+- **数据库**：默认使用 SQLite，如需使用 MySQL，请修改 `settings.py` 中的 `DATABASES` 配置，并确保已安装 PyMySQL。
+- **OCR 路径**：Linux/macOS 下 Tesseract 通常安装在 `/usr/bin/tesseract`，Windows 下请参照第 4 步配置路径。
